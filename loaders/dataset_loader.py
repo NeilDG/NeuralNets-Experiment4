@@ -30,9 +30,7 @@ def load_train_dataset(rgb_path, exr_path, segmentation_path):
         image_datasets.GenericImageDataset(img_length, rgb_list, exr_list, segmentation_list, 1),
         batch_size=network_config["load_size"],
         num_workers=general_config["num_workers"],
-        shuffle=False,
-        pin_memory=True,
-        pin_memory_device=general_config["cuda_device"]
+        shuffle=False
     )
 
     return data_loader, len(rgb_list)
@@ -60,9 +58,7 @@ def load_test_dataset(rgb_path, exr_path, segmentation_path):
         image_datasets.GenericImageDataset(img_length, rgb_list, exr_list, segmentation_list, 2),
         batch_size=16,
         num_workers=2,
-        shuffle=False,
-        pin_memory=True,
-        pin_memory_device=general_config["cuda_device"]
+        shuffle=False
     )
 
     return data_loader, len(rgb_list)

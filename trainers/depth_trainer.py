@@ -70,25 +70,61 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
 
         return self.ssim_loss(pred_normalized, target_normalized)
 
+    #From monodepth2 by godard
+    def get_smooth_loss(self, pred, target):
+        """Computes the smoothness loss for a disparity image
+        The color image is used for edge-aware smoothness
+        """
+        grad_disp_x = torch.abs(pred[:, :, :, :-1] - pred[:, :, :, 1:])
+        grad_disp_y = torch.abs(pred[:, :, :-1, :] - pred[:, :, 1:, :])
+
+        grad_img_x = torch.mean(torch.abs(target[:, :, :, :-1] - target[:, :, :, 1:]), 1, keepdim=True)
+        grad_img_y = torch.mean(torch.abs(target[:, :, :-1, :] - target[:, :, 1:, :]), 1, keepdim=True)
+
+        grad_disp_x *= torch.exp(-grad_img_x)
+        grad_disp_y *= torch.exp(-grad_img_y)
+
+        return grad_disp_x.mean() + grad_disp_y.mean()
+
     def initialize_dict(self):
+
+        # dictionary keys
+        self.G_LOSS_KEY = "g_loss"
+        self.IDENTITY_LOSS_KEY = "id"
+        self.CYCLE_LOSS_KEY = "cyc"
+        self.G_ADV_LOSS_KEY = "g_adv"
+        self.LIKENESS_LOSS_KEY = "likeness"
+        self.LPIP_LOSS_KEY = "lpip"
+        self.SSIM_LOSS_KEY = "ssim"
+        self.DISP_SMOOTH_LOSS_KEY = "disp_loss"
+
+        self.D_OVERALL_LOSS_KEY = "d_loss"
+        self.D_A_REAL_LOSS_KEY = "d_real_a"
+        self.D_A_FAKE_LOSS_KEY = "d_fake_a"
+        self.D_B_REAL_LOSS_KEY = "d_real_b"
+        self.D_B_FAKE_LOSS_KEY = "d_fake_b"
+
+
         # what to store in visdom?
         self.losses_dict_s = {}
-        self.losses_dict_s[global_config.G_LOSS_KEY] = []
-        self.losses_dict_s[global_config.D_OVERALL_LOSS_KEY] = []
-        self.losses_dict_s[global_config.LIKENESS_LOSS_KEY] = []
-        self.losses_dict_s[global_config.LPIP_LOSS_KEY] = []
-        self.losses_dict_s[global_config.G_ADV_LOSS_KEY] = []
-        self.losses_dict_s[global_config.D_A_FAKE_LOSS_KEY] = []
-        self.losses_dict_s[global_config.D_A_REAL_LOSS_KEY] = []
+        self.losses_dict_s[self.G_LOSS_KEY] = []
+        self.losses_dict_s[self.D_OVERALL_LOSS_KEY] = []
+        self.losses_dict_s[self.LIKENESS_LOSS_KEY] = []
+        self.losses_dict_s[self.LPIP_LOSS_KEY] = []
+        self.losses_dict_s[self.G_ADV_LOSS_KEY] = []
+        self.losses_dict_s[self.DISP_SMOOTH_LOSS_KEY] = []
+        self.losses_dict_s[self.D_A_FAKE_LOSS_KEY] = []
+        self.losses_dict_s[self.D_A_REAL_LOSS_KEY] = []
 
         self.caption_dict_s = {}
-        self.caption_dict_s[global_config.G_LOSS_KEY] = "Shadow G loss per iteration"
-        self.caption_dict_s[global_config.D_OVERALL_LOSS_KEY] = "D loss per iteration"
-        self.caption_dict_s[global_config.LIKENESS_LOSS_KEY] = "L1 loss per iteration"
-        self.caption_dict_s[global_config.LPIP_LOSS_KEY] = "LPIPS loss per iteration"
-        self.caption_dict_s[global_config.G_ADV_LOSS_KEY] = "G adv loss per iteration"
-        self.caption_dict_s[global_config.D_A_FAKE_LOSS_KEY] = "D fake loss per iteration"
-        self.caption_dict_s[global_config.D_A_REAL_LOSS_KEY] = "D real loss per iteration"
+        self.caption_dict_s[self.G_LOSS_KEY] = "Shadow G loss per iteration"
+        self.caption_dict_s[self.D_OVERALL_LOSS_KEY] = "D loss per iteration"
+        self.caption_dict_s[self.LIKENESS_LOSS_KEY] = "L1 loss per iteration"
+        self.caption_dict_s[self.LPIP_LOSS_KEY] = "LPIPS loss per iteration"
+        self.caption_dict_s[self.G_ADV_LOSS_KEY] = "G adv loss per iteration"
+        self.caption_dict_s[self.DISP_SMOOTH_LOSS_KEY] = "Disp smooth loss per iteration"
+        self.caption_dict_s[self.D_A_FAKE_LOSS_KEY] = "D fake loss per iteration"
+        self.caption_dict_s[self.D_A_REAL_LOSS_KEY] = "D real loss per iteration"
 
         # what to store in visdom?
         self.losses_dict_t = {}
@@ -134,12 +170,13 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
             rgb2target = self.G_depth(input_rgb)
             SM_likeness_loss = self.l1_loss(rgb2target, target_tensor) * self.hyperparams_table["l1_weight"]
             SM_lpip_loss = self.lpip_loss(rgb2target, target_tensor) * self.hyperparams_table["lpip_weight"]
+            SM_smooth_loss = self.get_smooth_loss(rgb2target, target_tensor) * self.hyperparams_table["disp_weight"]
 
             prediction = self.D_depth(rgb2target)
             real_tensor = torch.ones_like(prediction)
             SM_adv_loss = self.adversarial_loss(prediction, real_tensor) * self.adv_weight
 
-            errG = SM_likeness_loss + SM_lpip_loss + SM_adv_loss
+            errG = SM_likeness_loss + SM_lpip_loss + SM_smooth_loss + SM_adv_loss
 
             self.fp16_scaler.scale(errG).backward()
             if (accum_batch_size % self.batch_size == 0):
@@ -149,29 +186,32 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
 
             # what to put to losses dict for visdom reporting?
             if (iteration > 50):
-                self.losses_dict_s[global_config.G_LOSS_KEY].append(errG.item())
-                self.losses_dict_s[global_config.D_OVERALL_LOSS_KEY].append(errD.item())
-                self.losses_dict_s[global_config.LIKENESS_LOSS_KEY].append(SM_likeness_loss.item())
-                self.losses_dict_s[global_config.LPIP_LOSS_KEY].append(SM_lpip_loss.item())
-                self.losses_dict_s[global_config.G_ADV_LOSS_KEY].append(SM_adv_loss.item())
-                self.losses_dict_s[global_config.D_A_FAKE_LOSS_KEY].append(D_SM_fake_loss.item())
-                self.losses_dict_s[global_config.D_A_REAL_LOSS_KEY].append(D_SM_real_loss.item())
+                self.losses_dict_s[self.G_LOSS_KEY].append(errG.item())
+                self.losses_dict_s[self.D_OVERALL_LOSS_KEY].append(errD.item())
+                self.losses_dict_s[self.LIKENESS_LOSS_KEY].append(SM_likeness_loss.item())
+                self.losses_dict_s[self.LPIP_LOSS_KEY].append(SM_lpip_loss.item())
+                self.losses_dict_s[self.G_ADV_LOSS_KEY].append(SM_adv_loss.item())
+                self.losses_dict_s[self.DISP_SMOOTH_LOSS_KEY].append(SM_smooth_loss.item())
+                self.losses_dict_s[self.D_A_FAKE_LOSS_KEY].append(D_SM_fake_loss.item())
+                self.losses_dict_s[self.D_A_REAL_LOSS_KEY].append(D_SM_real_loss.item())
 
-            # perform validation test and early stopping
-            rgb2target_unseen = self.test_unseen(input_map)
-            target_unseen = input_map["depth_unseen"]
-            self.stopper_method.register_metric(rgb2target_unseen, target_unseen, epoch)
-            self.stop_result = self.stopper_method.test(epoch)
+                # perform validation test and early stopping
+                rgb2target_unseen = self.test_unseen(input_map)
+                target_unseen = input_map["depth_unseen"]
+                self.stopper_method.register_metric(rgb2target_unseen, target_unseen, epoch)
+                self.stop_result = self.stopper_method.test(epoch)
 
-            if (self.stopper_method.has_reset()):
-                self.save_states(epoch, iteration, False)
+                if (self.stopper_method.has_reset()):
+                    self.save_states(epoch, iteration, False)
 
-            # plot train-test loss
-            rgb2target_test = self.test(input_map)
-            rgb2target_test = tensor_utils.normalize_to_01(rgb2target_test)
-            target_tensor = tensor_utils.normalize_to_01(target_tensor)
-            self.losses_dict_t[self.TRAIN_LOSS_KEY].append(self.l1_loss(rgb2target_test, target_tensor).item())
-            self.losses_dict_t[self.TEST_LOSS_KEY].append(self.l1_loss(rgb2target_unseen, target_unseen).item())
+                # plot train-test loss
+                rgb2target_test = self.test(input_map)
+                rgb2target_unseen = tensor_utils.normalize_to_01(rgb2target_unseen)
+                target_unseen = tensor_utils.normalize_to_01(target_unseen)
+                rgb2target_test = tensor_utils.normalize_to_01(rgb2target_test)
+                target_tensor = tensor_utils.normalize_to_01(target_tensor)
+                self.losses_dict_t[self.TRAIN_LOSS_KEY].append(self.l1_loss(rgb2target_test, target_tensor).item())
+                self.losses_dict_t[self.TEST_LOSS_KEY].append(self.l1_loss(rgb2target_unseen, target_unseen).item())
 
     def test(self, input_map):
         with torch.no_grad():

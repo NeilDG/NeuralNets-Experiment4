@@ -1,6 +1,9 @@
 import os.path
 import torch
 import os
+
+from config.network_config import NetworkConfig
+
 os.environ["OPENCV_IO_ENABLE_OPENEXR"]="1"
 import cv2
 import numpy as np
@@ -14,6 +17,8 @@ import kornia.augmentation as K
 
 class GenericImageDataset(data.Dataset):
     def __init__(self, img_length, rgb_list, exr_list, segmentation_list, transform_config):
+        network_config = NetworkConfig.getInstance().get_network_config()
+
         self.img_length = img_length
         self.rgb_list = rgb_list
         self.exr_list = exr_list
@@ -29,7 +34,8 @@ class GenericImageDataset(data.Dataset):
         ])
 
         if (self.transform_config == 1):
-            self.patch_size = (32, 32)
+            patch_size = network_config["patch_size"]
+            self.patch_size = (patch_size, patch_size)
         else:
             self.patch_size = (256, 256)
 

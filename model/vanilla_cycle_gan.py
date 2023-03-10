@@ -73,7 +73,7 @@ class ResidualBlock(nn.Module):
         return x + self.conv_block(x)
 
 class Generator(nn.Module):
-    def __init__(self, input_nc=3, output_nc=3, downsampling_blocks = 2, n_residual_blocks=6, has_dropout = True,
+    def __init__(self, input_nc=3, output_nc=3, downsampling_blocks = 2, n_residual_blocks=6, dropout_rate = 0.0,
                  use_cbam = False, norm = "batch"):
         super(Generator, self).__init__()
 
@@ -93,8 +93,7 @@ class Generator(nn.Module):
                         nn.ReLU(inplace=True)
                     ]
 
-            if(has_dropout):
-                model +=[nn.Dropout2d(p = 0.4)]
+            model +=[nn.Dropout2d(p = dropout_rate)]
             in_features = out_features
             out_features = clamp(in_features*2, 32768)
 
@@ -115,8 +114,7 @@ class Generator(nn.Module):
                         NormBlock(out_features, norm),
                         nn.ReLU(inplace=True)]
 
-            if (has_dropout):
-                model += [nn.Dropout2d(p=0.4)]
+            model += [nn.Dropout2d(p=dropout_rate)]
             in_features = out_features
             out_features = in_features//2
 

@@ -25,14 +25,14 @@ parser.add_option('--server_config', type=int, help="Is running on COARE?", defa
 parser.add_option('--cuda_device', type=str, help="CUDA Device?", default="cuda:0")
 parser.add_option('--img_to_load', type=int, help="Image to load?", default=-1)
 parser.add_option('--network_version', type=str, default="vXX.XX")
-parser.add_option('--iteration')
+parser.add_option('--iteration', type=int, default=1)
 parser.add_option('--plot_enabled', type=int, default=1)
 
 def update_config(opts):
     global_config.server_config = opts.server_config
     global_config.plot_enabled = opts.plot_enabled
     global_config.general_config["network_version"] = opts.network_version
-    global_config.general_config["iteration"] = 1
+    global_config.general_config["iteration"] = opts.iteration
     network_config = NetworkConfig.getInstance().get_network_config()
 
     if(global_config.server_config == 1): #COARE
@@ -124,7 +124,7 @@ def main(argv):
             if(dt.is_stop_condition_met()):
                 break
 
-            if(i % 100 == 0):
+            if(iteration % 50 == 0):
                 dt.save_states(epoch, iteration, True)
 
                 if(global_config.plot_enabled == 1):
