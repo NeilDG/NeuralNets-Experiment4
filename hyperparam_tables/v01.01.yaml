@@ -2,8 +2,8 @@ model_type: 3 #1 = vanilla cycle gan, 2 = u-net, 3 = ffa-net
 input_nc: 3
 patch_size: 64
 
-batch_size: 64 #amount of images to accumulate before backprop
-load_size: 64 #amount of images to load in GPU. load_size <= batch_size
+batch_size: 512 #amount of images to accumulate before backprop
+load_size: 512 #amount of images to load in GPU. load_size <= batch_size
 
 num_blocks: 6
 weight_decay: 0.0
@@ -12,11 +12,11 @@ augment_key: "none"
 
 g_lr: 0.0002
 d_lr: 0.0005
-min_epochs: 5
-max_epochs: 10
+min_epochs: 15
+max_epochs: 20
 
 dataset_version: "v01_fcity"
-dataset_repeats: 10
+dataset_repeats: 5
 
 hyperparams:
   1:

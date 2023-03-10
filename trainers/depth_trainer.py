@@ -158,8 +158,9 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
                 self.losses_dict_s[global_config.D_A_REAL_LOSS_KEY].append(D_SM_real_loss.item())
 
             # perform validation test and early stopping
-            rgb2target_test = self.test(input_map)
-            self.stopper_method.register_metric(rgb2target_test, target_tensor, epoch)
+            rgb2target_unseen = self.test_unseen(input_map)
+            target_unseen = input_map["depth_unseen"]
+            self.stopper_method.register_metric(rgb2target_unseen, target_unseen, epoch)
             self.stop_result = self.stopper_method.test(epoch)
 
             if (self.stopper_method.has_reset()):
@@ -170,13 +171,22 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
             rgb2target_test = tensor_utils.normalize_to_01(rgb2target_test)
             target_tensor = tensor_utils.normalize_to_01(target_tensor)
             self.losses_dict_t[self.TRAIN_LOSS_KEY].append(self.l1_loss(rgb2target_test, target_tensor).item())
-            # self.losses_dict_t[self.TEST_LOSS_KEY].append(self.l1_loss(rgb2ns_istd, istd_ns_test).item())
+            self.losses_dict_t[self.TEST_LOSS_KEY].append(self.l1_loss(rgb2target_unseen, target_unseen).item())
 
     def test(self, input_map):
         with torch.no_grad():
             self.G_depth.eval()
 
             input_rgb = input_map["rgb"]
+            rgb2target = self.G_depth(input_rgb)
+
+        return rgb2target
+
+    def test_unseen(self, input_map):
+        with torch.no_grad():
+            self.G_depth.eval()
+
+            input_rgb = input_map["rgb_unseen"]
             rgb2target = self.G_depth(input_rgb)
 
         return rgb2target
@@ -193,7 +203,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.visdom_reporter.plot_image(rgb2target, str(label) + " Depth-Like images - " + self.NETWORK_VERSION + str(self.iteration))
         if("depth" in input_map):
             target_tensor = input_map["depth"]
-            self.visdom_reporter.plot_image(target_tensor, str(label) + " Depth-Like images - " + self.NETWORK_VERSION + str(self.iteration))
+            self.visdom_reporter.plot_image(target_tensor, str(label) + " Depth images - " + self.NETWORK_VERSION + str(self.iteration))
 
     def save_states(self, epoch, iteration, is_temp:bool):
         save_dict = {'epoch': epoch, 'iteration': iteration, global_config.LAST_METRIC_KEY: self.stopper_method.get_last_metric()}

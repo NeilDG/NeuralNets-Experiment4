@@ -20,7 +20,7 @@ class NetworkCreator():
         elif (model_type == 2):
             G_A = unet_gan.UnetGenerator(input_nc=network_config["input_nc"], output_nc=3, num_downs=network_config["num_blocks"]).to(self.gpu_device)
         else:
-            G_A = ffa_gan.FFA(network_config["input_nc"], network_config["num_blocks"], dropout_rate=network_config["dropout_rate"]).to(self.gpu_device)
+            G_A = ffa_gan.FFAGrey(network_config["num_blocks"], dropout_rate=network_config["dropout_rate"]).to(self.gpu_device)
 
         D_A = cycle_gan.Discriminator(input_nc=1).to(self.gpu_device)  # use CycleGAN's discriminator
 

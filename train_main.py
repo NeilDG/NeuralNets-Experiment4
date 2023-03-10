@@ -33,6 +33,7 @@ def update_config(opts):
     global_config.plot_enabled = opts.plot_enabled
     global_config.general_config["network_version"] = opts.network_version
     global_config.general_config["iteration"] = 1
+    network_config = NetworkConfig.getInstance().get_network_config()
 
     if(global_config.server_config == 1): #COARE
         global_config.general_config["num_workers"] = 6
@@ -52,7 +53,8 @@ def update_config(opts):
 
     elif(global_config.server_config == 4):
         global_config.general_config["num_workers"] = 12
-        global_config.path = "X:/SynthV3_Raw/sequence.0/"
+        global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
+        global_config.path = global_config.path.format(dataset_version = network_config["dataset_version"])
         global_config.exr_path = global_config.path + "*.exr"
         global_config.rgb_path = global_config.path + "*.camera.png"
         global_config.segmentation_path = global_config.path + "*.semantic segmentation.png"
@@ -64,28 +66,31 @@ def main(argv):
     print("Device: %s" % device)
 
     (opts, args) = parser.parse_args(argv)
-    update_config(opts)
-    print(opts)
-    print("=====================BEGIN============================")
-    print("Server config? %d Has GPU available? %d Count: %d" % (global_config.server_config, torch.cuda.is_available(), torch.cuda.device_count()))
-    print("Torch CUDA version: %s" % torch.version.cuda)
-
     yaml_config = "./hyperparam_tables/{network_version}.yaml"
-    yaml_config = yaml_config.format(network_version = opts.network_version)
+    yaml_config = yaml_config.format(network_version=opts.network_version)
     with open(yaml_config) as f:
         NetworkConfig.initialize(yaml.load(f, SafeLoader))
 
     network_config = NetworkConfig.getInstance().get_network_config()
     print(network_config)
 
+    update_config(opts)
+    print(opts)
+    print("=====================BEGIN============================")
+    print("Server config? %d Has GPU available? %d Count: %d" % (global_config.server_config, torch.cuda.is_available(), torch.cuda.device_count()))
+    print("Torch CUDA version: %s" % torch.version.cuda)
+
     rgb_path = global_config.rgb_path
     exr_path = global_config.exr_path
     segmentation_path = global_config.segmentation_path
 
+    print("Dataset path: ", global_config.path)
+
     plot_utils.VisdomReporter.initialize()
     visdom_reporter = plot_utils.VisdomReporter.getInstance()
 
-    train_loader, dataset_count = dataset_loader.load_custom_dataset(rgb_path, exr_path, segmentation_path, 1)
+    train_loader, dataset_count = dataset_loader.load_train_dataset(rgb_path, exr_path, segmentation_path)
+    test_loader, dataset_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
     dt = depth_trainer.DepthTrainer(device)
 
     iteration = 0
@@ -101,12 +106,16 @@ def main(argv):
     pbar.update(current_progress)
 
     for epoch in range(start_epoch, network_config["max_epochs"]):
-        for i, (rgb_batch, depth_batch, segmentation_batch) in enumerate(train_loader, 0):
+        for i, (train_data, test_data) in enumerate(zip(train_loader, itertools.cycle(test_loader))):
+            rgb_batch, depth_batch, _ = train_data
             rgb_batch = rgb_batch.to(device)
             depth_batch = depth_batch.to(device)
-            segmentation_batch = segmentation_batch.to(device)
 
-            input_map = {"rgb" : rgb_batch, "depth" : depth_batch}
+            rgb_unseen, depth_unseen, _ = test_data #TODO: Change to cityscapes/KITTI
+            rgb_unseen = rgb_unseen.to(device)
+            depth_unseen = depth_unseen.to(device)
+
+            input_map = {"rgb" : rgb_batch, "depth" : depth_batch, "rgb_unseen" : rgb_unseen, "depth_unseen" : depth_unseen}
             dt.train(epoch, iteration, input_map, input_map)
 
             iteration = iteration + 1
@@ -121,6 +130,13 @@ def main(argv):
                 if(global_config.plot_enabled == 1):
                     dt.visdom_plot(iteration)
                     dt.visdom_visualize(input_map, "Train")
+
+                    rgb_batch, depth_batch, _ = test_data
+                    rgb_batch = rgb_batch.to(device)
+                    depth_batch = depth_batch.to(device)
+                    input_map = {"rgb": rgb_batch, "depth": depth_batch}
+
+                    dt.visdom_visualize(input_map, "Test")
 
         if(dt.is_stop_condition_met()):
             break
