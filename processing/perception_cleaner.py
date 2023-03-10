@@ -13,7 +13,6 @@ def organize_dataset():
     visdom_reporter = plot_utils.VisdomReporter.getInstance()
 
     path = "X:/SynthV3_Raw/sequence.0/"
-
     exr_path = path + "*.exr"
     rgb_path = path + "*.camera.png"
     segmentation_path = path + "*.semantic segmentation.png"
@@ -24,7 +23,7 @@ def organize_dataset():
     opts["cuda_device"] = "cuda:0"
     opts["train_config"] = 1
 
-    test_loader = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path, opts)
+    test_loader = dataset_loader.load_custom_dataset(rgb_path, exr_path, segmentation_path, opts)
     for i, (rgb_batch, depth_batch, segmentation_batch) in enumerate(test_loader, 0):
         rgb_batch = rgb_batch.to(device)
         depth_batch = depth_batch.to(device)
@@ -37,7 +36,7 @@ def organize_dataset():
         break
 
     opts["train_config"] = 2
-    test_loader = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path, opts)
+    test_loader = dataset_loader.load_custom_dataset(rgb_path, exr_path, segmentation_path, opts)
     for i, (rgb_batch, depth_batch, segmentation_batch) in enumerate(test_loader, 0):
         rgb_batch = rgb_batch.to(device)
         depth_batch = depth_batch.to(device)
