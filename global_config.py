@@ -18,7 +18,8 @@ general_config = {
     "cuda_device" : "cuda:0",
     "network_version" : "VXX.XX",
     "iteration" : 1,
-    "current_epoch" : 0
+    "current_epoch" : 0,
+    "test_size" : 16
 }
 
 path = ""

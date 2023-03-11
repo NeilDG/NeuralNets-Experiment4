@@ -13,7 +13,7 @@ from config.network_config import NetworkConfig
 from loaders import dataset_loader
 import global_config
 from utils import plot_utils
-from trainers import depth_trainer
+from testers import depth_tester
 from tqdm import tqdm
 from tqdm.auto import trange
 from time import sleep
@@ -33,6 +33,8 @@ def update_config(opts):
     global_config.plot_enabled = opts.plot_enabled
     global_config.general_config["network_version"] = opts.network_version
     global_config.general_config["iteration"] = opts.iteration
+    global_config.general_config["test_size"] = 128
+
     network_config = NetworkConfig.getInstance().get_network_config()
 
     if(global_config.server_config == 1): #COARE
@@ -71,14 +73,17 @@ def main(argv):
     with open(yaml_config) as f:
         NetworkConfig.initialize(yaml.load(f, SafeLoader))
 
-    network_config = NetworkConfig.getInstance().get_network_config()
-    print(network_config)
-
     update_config(opts)
     print(opts)
     print("=====================BEGIN============================")
     print("Server config? %d Has GPU available? %d Count: %d" % (global_config.server_config, torch.cuda.is_available(), torch.cuda.device_count()))
     print("Torch CUDA version: %s" % torch.version.cuda)
+
+    network_config = NetworkConfig.getInstance().get_network_config()
+    print(network_config)
+
+    general_config = global_config.general_config
+    print(general_config)
 
     rgb_path = global_config.rgb_path
     exr_path = global_config.exr_path
@@ -87,61 +92,40 @@ def main(argv):
     print("Dataset path: ", global_config.path)
 
     plot_utils.VisdomReporter.initialize()
-    visdom_reporter = plot_utils.VisdomReporter.getInstance()
 
-    train_loader, dataset_count = dataset_loader.load_train_dataset(rgb_path, exr_path, segmentation_path)
     test_loader, dataset_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
-    dt = depth_trainer.DepthTrainer(device)
+    dt = depth_tester.DepthTester(device)
 
-    iteration = 0
     start_epoch = global_config.general_config["current_epoch"]
     print("---------------------------------------------------------------------------")
-    print("Started Training loop for mode: depth", " Set start epoch: ", start_epoch)
+    print("Started testing loop for mode: depth", " Set start epoch: ", start_epoch)
     print("---------------------------------------------------------------------------")
 
     # compute total progress
-    needed_progress = int((network_config["max_epochs"]) * (dataset_count / network_config["load_size"]))
-    current_progress = int(start_epoch * (dataset_count / network_config["load_size"]))
+    steps = general_config["test_size"]
+    needed_progress = int(dataset_count / steps)
+    current_progress = 0
     pbar = tqdm(total=needed_progress, disable=global_config.disable_progress_bar)
     pbar.update(current_progress)
 
-    for epoch in range(start_epoch, network_config["max_epochs"]):
-        for i, (train_data, test_data) in enumerate(zip(train_loader, itertools.cycle(test_loader))):
-            rgb_batch, depth_batch, _ = train_data
-            rgb_batch = rgb_batch.to(device)
-            depth_batch = depth_batch.to(device)
+    for i, (rgb_batch, depth_batch, _) in enumerate(test_loader, 0):
+        rgb_batch = rgb_batch.to(device)
+        depth_batch = depth_batch.to(device)
 
-            rgb_unseen, depth_unseen, _ = test_data #TODO: Change to cityscapes/KITTI
-            rgb_unseen = rgb_unseen.to(device)
-            depth_unseen = depth_unseen.to(device)
-
-            input_map = {"rgb" : rgb_batch, "depth" : depth_batch, "rgb_unseen" : rgb_unseen, "depth_unseen" : depth_unseen}
-            dt.train(epoch, iteration, input_map, input_map)
-
-            iteration = iteration + 1
-            pbar.update(1)
-
-            if(dt.is_stop_condition_met()):
-                break
-
-            if(iteration % 200 == 0):
-                dt.save_states(epoch, iteration, True)
-
-                if(global_config.plot_enabled == 1):
-                    dt.visdom_plot(iteration)
-                    dt.visdom_visualize(input_map, "Train")
-
-                    rgb_batch, depth_batch, _ = test_data
-                    rgb_batch = rgb_batch.to(device)
-                    depth_batch = depth_batch.to(device)
-                    input_map = {"rgb": rgb_batch, "depth": depth_batch}
-
-                    dt.visdom_visualize(input_map, "Test")
-
-        if(dt.is_stop_condition_met()):
-            break
+        input_map = {"rgb" : rgb_batch, "depth" : depth_batch}
+        dt.measure_and_store(input_map)
+        pbar.update(1)
 
     pbar.close()
+
+    rgb_batch, depth_batch, _ = next(iter(test_loader)) #visualize one batch
+    rgb_batch = rgb_batch.to(device)
+    depth_batch = depth_batch.to(device)
+    input_map = {"rgb": rgb_batch, "depth": depth_batch}
+    if (global_config.plot_enabled == 1):
+        dt.report_and_visualize(input_map)
+
+
 
 if __name__ == "__main__":
     main(sys.argv)

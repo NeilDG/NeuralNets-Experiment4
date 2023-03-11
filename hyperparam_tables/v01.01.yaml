@@ -2,8 +2,8 @@ model_type: 3 #1 = vanilla cycle gan, 2 = u-net, 3 = ffa-net
 input_nc: 3
 patch_size: 256
 
-batch_size: 12 #amount of images to accumulate before backprop
-load_size: 12 #amount of images to load in GPU. load_size <= batch_size
+batch_size: 8 #amount of images to accumulate before backprop
+load_size: 8 #amount of images to load in GPU. load_size <= batch_size
 
 num_blocks: 6
 weight_decay: 0.0
