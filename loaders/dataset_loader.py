@@ -58,3 +58,25 @@ def load_test_dataset(rgb_path, exr_path, segmentation_path):
 
     return data_loader, len(rgb_list)
 
+def load_kitti_test_dataset(rgb_path, depth_path):
+    general_config = global_config.general_config
+
+    rgb_list = glob.glob(rgb_path)
+    depth_list = glob.glob(depth_path)
+
+    temp_list = list(zip(rgb_list, depth_list))
+    random.shuffle(temp_list)
+
+    rgb_list, depth_list = zip(*temp_list)
+    img_length = len(rgb_list)
+    print("Length of images: %d %d" % (img_length, len(depth_list)))
+
+    data_loader = torch.utils.data.DataLoader(
+        image_datasets.KittiDepthDataset(img_length, rgb_list, depth_list),
+        batch_size=general_config["test_size"],
+        num_workers=2,
+        shuffle=False
+    )
+
+    return data_loader, len(rgb_list)
+

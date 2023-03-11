@@ -93,32 +93,68 @@ def main(argv):
 
     plot_utils.VisdomReporter.initialize()
 
-    test_loader, dataset_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
-    dt = depth_tester.DepthTester(device)
+    # synth_loader, dataset_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
+    # dt = depth_tester.DepthTester(device)
+    # start_epoch = global_config.general_config["current_epoch"]
+    # print("---------------------------------------------------------------------------")
+    # print("Started synth test loop for mode: depth", " Set start epoch: ", start_epoch)
+    # print("---------------------------------------------------------------------------")
+    #
+    # # compute total progress
+    # steps = general_config["test_size"]
+    # needed_progress = int(dataset_count / steps) + 1
+    # current_progress = 0
+    # pbar = tqdm(total=needed_progress, disable=global_config.disable_progress_bar)
+    # pbar.update(current_progress)
+    #
+    # for i, (rgb_batch, depth_batch, _) in enumerate(synth_loader, 0):
+    #     rgb_batch = rgb_batch.to(device)
+    #     depth_batch = depth_batch.to(device)
+    #
+    #     input_map = {"rgb" : rgb_batch, "depth" : depth_batch}
+    #     dt.measure_and_store(input_map)
+    #     pbar.update(1)
+    #
+    # pbar.close()
+    #
+    # rgb_batch, depth_batch, _ = next(iter(synth_loader)) #visualize one batch
+    # rgb_batch = rgb_batch.to(device)
+    # depth_batch = depth_batch.to(device)
+    # input_map = {"rgb": rgb_batch, "depth": depth_batch}
+    # if (global_config.plot_enabled == 1):
+    #     dt.report_and_visualize(input_map)
 
-    start_epoch = global_config.general_config["current_epoch"]
-    print("---------------------------------------------------------------------------")
-    print("Started testing loop for mode: depth", " Set start epoch: ", start_epoch)
-    print("---------------------------------------------------------------------------")
+    kitti_rgb_path = "X:/KITTI Depth Test/val_selection_cropped/image/*.png"
+    kitti_depth_path = "X:/KITTI Depth Test/val_selection_cropped/groundtruth_depth/*.png"
 
     # compute total progress
+    global_config.general_config["test_size"] = 256
+    general_config = global_config.general_config
+    print(general_config)
+
+    kitti_loader, dataset_count = dataset_loader.load_kitti_test_dataset(kitti_rgb_path, kitti_depth_path)
+    dt = depth_tester.DepthTester(device)
+    start_epoch = global_config.general_config["current_epoch"]
+    print("---------------------------------------------------------------------------")
+    print("Started kitti test loop for mode: depth", " Set start epoch: ", start_epoch)
+    print("---------------------------------------------------------------------------")
     steps = general_config["test_size"]
-    needed_progress = int(dataset_count / steps)
+    needed_progress = int(dataset_count / steps) + 1
     current_progress = 0
     pbar = tqdm(total=needed_progress, disable=global_config.disable_progress_bar)
     pbar.update(current_progress)
 
-    for i, (rgb_batch, depth_batch, _) in enumerate(test_loader, 0):
+    for i, (rgb_batch, depth_batch) in enumerate(kitti_loader, 0):
         rgb_batch = rgb_batch.to(device)
         depth_batch = depth_batch.to(device)
 
-        input_map = {"rgb" : rgb_batch, "depth" : depth_batch}
+        input_map = {"rgb": rgb_batch, "depth": depth_batch}
         dt.measure_and_store(input_map)
         pbar.update(1)
 
     pbar.close()
 
-    rgb_batch, depth_batch, _ = next(iter(test_loader)) #visualize one batch
+    rgb_batch, depth_batch = next(iter(kitti_loader))  # visualize one batch
     rgb_batch = rgb_batch.to(device)
     depth_batch = depth_batch.to(device)
     input_map = {"rgb": rgb_batch, "depth": depth_batch}

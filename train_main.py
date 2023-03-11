@@ -89,8 +89,8 @@ def main(argv):
     plot_utils.VisdomReporter.initialize()
     visdom_reporter = plot_utils.VisdomReporter.getInstance()
 
-    train_loader, dataset_count = dataset_loader.load_train_dataset(rgb_path, exr_path, segmentation_path)
-    test_loader, dataset_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
+    train_loader, train_count = dataset_loader.load_train_dataset(rgb_path, exr_path, segmentation_path)
+    test_loader, test_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
     dt = depth_trainer.DepthTrainer(device)
 
     iteration = 0
@@ -100,8 +100,8 @@ def main(argv):
     print("---------------------------------------------------------------------------")
 
     # compute total progress
-    needed_progress = int((network_config["max_epochs"]) * (dataset_count / network_config["load_size"]))
-    current_progress = int(start_epoch * (dataset_count / network_config["load_size"]))
+    needed_progress = int((network_config["max_epochs"]) * (train_count / network_config["load_size"]))
+    current_progress = int(start_epoch * (train_count / network_config["load_size"]))
     pbar = tqdm(total=needed_progress, disable=global_config.disable_progress_bar)
     pbar.update(current_progress)
 
@@ -124,7 +124,7 @@ def main(argv):
             if(dt.is_stop_condition_met()):
                 break
 
-            if(iteration % 200 == 0):
+            if(iteration % 50 == 0):
                 dt.save_states(epoch, iteration, True)
 
                 if(global_config.plot_enabled == 1):

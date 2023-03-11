@@ -3,6 +3,7 @@ import torch
 import os
 
 from config.network_config import NetworkConfig
+from utils import tensor_utils
 
 os.environ["OPENCV_IO_ENABLE_OPENEXR"]="1"
 import cv2
@@ -73,6 +74,42 @@ class GenericImageDataset(data.Dataset):
             segmentation_img = None
 
         return rgb_img, depth_img, segmentation_img
+
+    def __len__(self):
+        return self.img_length
+
+class KittiDepthDataset(data.Dataset):
+    def __init__(self, img_length, rgb_list, depth_list):
+        self.img_length = img_length
+        self.rgb_list = rgb_list
+        self.depth_list = depth_list
+
+        self.norm_op = transforms.Normalize((0.5, ), (0.5, ))
+
+        self.initial_op = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((88, 304)), #divide by 4 KITTI size
+            transforms.ToTensor()
+        ])
+
+        self.depth_op = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Resize((88, 304)),  # divide by 4 KITTI size
+        ])
+
+    def __getitem__(self, idx):
+        rgb_img = cv2.imread(self.rgb_list[idx])
+        rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2RGB)
+        rgb_img = self.initial_op(rgb_img)
+
+        depth_img = tensor_utils.kitti_depth_read(self.depth_list[idx])
+        # depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
+        depth_img = self.depth_op(depth_img)
+
+        rgb_img = self.norm_op(rgb_img)
+        depth_img = self.norm_op(depth_img)
+
+        return rgb_img, depth_img
 
     def __len__(self):
         return self.img_length
