@@ -2,7 +2,7 @@ model_type: 1 #1 = vanilla cycle gan, 2 = u-net, 3 = ffa-net
 input_nc: 3
 patch_size: 256
 
-#0 - COARE, 1 - CCS Cloud, 3 - 2080Ti, 4 - 3090
+#0 - COARE, 1 - CCS Cloud, 2 - 2080Ti, 3 - 3090
 batch_size: [32, 16, 4, 32] #amount of images to accumulate before backprop
 load_size: [32, 16, 4, 32] #amount of images to load in GPU. load_size <= batch_size
 
