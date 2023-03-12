@@ -88,7 +88,7 @@ def main(argv):
     exr_path = global_config.exr_path
     segmentation_path = global_config.segmentation_path
 
-    print("Dataset path: ", global_config.path)
+    print("Dataset path: ", rgb_path)
 
     plot_utils.VisdomReporter.initialize()
     visdom_reporter = plot_utils.VisdomReporter.getInstance()
