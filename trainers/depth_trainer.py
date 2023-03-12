@@ -181,7 +181,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
             self.optimizerG.zero_grad()
             self.G_depth.train()
             rgb2target = self.G_depth(input_rgb)
-            SM_likeness_loss = self.l1_depth_log_loss(rgb2target, target_tensor) * self.hyperparams_table["l1_weight"]
+            SM_likeness_loss = self.l1_loss(rgb2target, target_tensor) * self.hyperparams_table["l1_weight"]
             SM_lpip_loss = self.lpip_loss(rgb2target, target_tensor) * self.hyperparams_table["lpip_weight"]
             SM_smooth_loss = self.get_smooth_loss(rgb2target, target_tensor) * self.hyperparams_table["disp_weight"]
             mask_tensor = (target_tensor > 0.01) * 1.0

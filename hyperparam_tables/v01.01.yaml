@@ -19,19 +19,21 @@ dataset_version: "v01_fcity"
 dataset_repeats: 5
 
 hyperparams:
-  1:
-    l1_weight: 10.0
+  3:
+    l1_weight: 2.0
     lpip_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01
+    grad_weight: 1.0
     is_bce: 0
 
-  2:
-    l1_weight: 10.0
+  4:
+    l1_weight: 2.0
     lpip_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01
-    is_bce: 1
+    grad_weight: 1.0
+    is_bce: 0
 
 
 

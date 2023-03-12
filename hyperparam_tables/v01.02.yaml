@@ -21,7 +21,7 @@ dataset_repeats: 5
 
 hyperparams:
   3:
-    l1_weight: 10.0
+    l1_weight: 2.0
     lpip_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01
@@ -29,7 +29,7 @@ hyperparams:
     is_bce: 0
 
   4:
-    l1_weight: 10.0
+    l1_weight: 2.0
     lpip_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01

@@ -93,36 +93,36 @@ def main(argv):
 
     plot_utils.VisdomReporter.initialize()
 
-    # synth_loader, dataset_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
-    # dt = depth_tester.DepthTester(device)
-    # start_epoch = global_config.general_config["current_epoch"]
-    # print("---------------------------------------------------------------------------")
-    # print("Started synth test loop for mode: depth", " Set start epoch: ", start_epoch)
-    # print("---------------------------------------------------------------------------")
-    #
-    # # compute total progress
-    # steps = general_config["test_size"]
-    # needed_progress = int(dataset_count / steps) + 1
-    # current_progress = 0
-    # pbar = tqdm(total=needed_progress, disable=global_config.disable_progress_bar)
-    # pbar.update(current_progress)
-    #
-    # for i, (rgb_batch, depth_batch, _) in enumerate(synth_loader, 0):
-    #     rgb_batch = rgb_batch.to(device)
-    #     depth_batch = depth_batch.to(device)
-    #
-    #     input_map = {"rgb" : rgb_batch, "depth" : depth_batch}
-    #     dt.measure_and_store(input_map)
-    #     pbar.update(1)
-    #
-    # pbar.close()
-    #
-    # rgb_batch, depth_batch, _ = next(iter(synth_loader)) #visualize one batch
-    # rgb_batch = rgb_batch.to(device)
-    # depth_batch = depth_batch.to(device)
-    # input_map = {"rgb": rgb_batch, "depth": depth_batch}
-    # if (global_config.plot_enabled == 1):
-    #     dt.report_and_visualize(input_map)
+    synth_loader, dataset_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
+    dt = depth_tester.DepthTester(device)
+    start_epoch = global_config.general_config["current_epoch"]
+    print("---------------------------------------------------------------------------")
+    print("Started synth test loop for mode: depth", " Set start epoch: ", start_epoch)
+    print("---------------------------------------------------------------------------")
+
+    # compute total progress
+    steps = general_config["test_size"]
+    needed_progress = int(dataset_count / steps) + 1
+    current_progress = 0
+    pbar = tqdm(total=needed_progress, disable=global_config.disable_progress_bar)
+    pbar.update(current_progress)
+
+    for i, (rgb_batch, depth_batch, _) in enumerate(synth_loader, 0):
+        rgb_batch = rgb_batch.to(device)
+        depth_batch = depth_batch.to(device)
+
+        input_map = {"rgb" : rgb_batch, "depth" : depth_batch}
+        dt.measure_and_store(input_map)
+        pbar.update(1)
+
+    pbar.close()
+
+    rgb_batch, depth_batch, _ = next(iter(synth_loader)) #visualize one batch
+    rgb_batch = rgb_batch.to(device)
+    depth_batch = depth_batch.to(device)
+    input_map = {"rgb": rgb_batch, "depth": depth_batch}
+    if (global_config.plot_enabled == 1):
+        dt.report_and_visualize(input_map, "FCity")
 
     kitti_rgb_path = "X:/KITTI Depth Test/val_selection_cropped/image/*.png"
     kitti_depth_path = "X:/KITTI Depth Test/val_selection_cropped/groundtruth_depth/*.png"
@@ -159,7 +159,7 @@ def main(argv):
     depth_batch = depth_batch.to(device)
     input_map = {"rgb": rgb_batch, "depth": depth_batch}
     if (global_config.plot_enabled == 1):
-        dt.report_and_visualize(input_map)
+        dt.report_and_visualize(input_map, "KITTI")
 
 
 
