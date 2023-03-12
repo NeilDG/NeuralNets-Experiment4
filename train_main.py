@@ -129,7 +129,7 @@ def main(argv):
             if(dt.is_stop_condition_met()):
                 break
 
-            if(iteration % 50 == 0):
+            if(iteration % 200 == 0):
                 dt.save_states(epoch, iteration, True)
 
                 if(global_config.plot_enabled == 1):
