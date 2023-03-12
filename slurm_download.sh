@@ -41,7 +41,7 @@ unzip "$OUTPUT_DIR/$DATASET_NAME+fixed.zip" -d "$OUTPUT_DIR"
 mv "$OUTPUT_DIR/$DATASET_NAME+fixed" "$OUTPUT_DIR/$DATASET_NAME"
 rm -rf "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
 
-if [ $SERVER_CONFIG == 1 ]
-then
-  python "ccs1_main.py"
-fi
+#if [ $SERVER_CONFIG == 1 ]
+#then
+#  python "ccs1_main.py"
+#fi
