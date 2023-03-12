@@ -1,3 +1,4 @@
+from config import network_config
 from config.network_config import NetworkConfig
 from trainers import abstract_iid_trainer
 import global_config
@@ -52,12 +53,14 @@ class DepthTester():
         rmse_result = depth_metrics.torch_rmse(rgb2target, target_depth).cpu()
         self.rmse_results.append(rmse_result)
 
-        rmse_log_result = depth_metrics.torch_rmse_log(target_depth, target_depth * 0.15).cpu()
+        rmse_log_result = depth_metrics.torch_rmse_log(target_depth,rgb2target).cpu()
         print("Rmse log result: ", rmse_log_result)
         self.rmse_log_results.append(rmse_log_result)
 
     def report_and_visualize(self, input_map, dataset_title):
-        self.dt.visdom_visualize(input_map, "Test - " + dataset_title)
+        version_name = network_config.NetworkConfig.getInstance().get_version_name()
+
+        self.dt.visdom_visualize(input_map, "Test - " + version_name + " " + dataset_title)
 
         l1_mean = np.round(np.mean(self.l1_results), 4)
         self.l1_results.clear()
@@ -71,7 +74,7 @@ class DepthTester():
         rmse_log_mean = np.round(np.mean(self.rmse_log_results), 4)
         self.rmse_log_results.clear()
 
-        self.visdom_reporter.plot_text(dataset_title + " Results" + "<br>"
+        self.visdom_reporter.plot_text(dataset_title + " Results - " + version_name + "<br>"
                                        + "Abs Rel: " + str(l1_mean) + "<br>"
                                         "Sqr Rel: " + str(mse_mean) + "<br>"
                                        "RMSE: " + str(rmse_mean) + "<br>"

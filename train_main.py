@@ -35,23 +35,23 @@ def update_config(opts):
     global_config.general_config["iteration"] = opts.iteration
     network_config = NetworkConfig.getInstance().get_network_config()
 
-    if(global_config.server_config == 1): #COARE
+    if(global_config.server_config == 0): #COARE
         global_config.general_config["num_workers"] = 6
         global_config.disable_progress_bar = True
 
         print("Using COARE configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif(global_config.server_config == 2): #CCS Cloud
+    elif(global_config.server_config == 1): #CCS Cloud
         global_config.general_config["num_workers"] = 12
 
         print("Using CCS configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif(global_config.server_config == 3): #RTX 2080Ti
+    elif(global_config.server_config == 2): #RTX 2080Ti
         global_config.general_config["num_workers"] = 6
 
         print("Using RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif(global_config.server_config == 4):
+    elif(global_config.server_config == 3):
         global_config.general_config["num_workers"] = 12
         global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
         global_config.path = global_config.path.format(dataset_version = network_config["dataset_version"])
@@ -68,11 +68,14 @@ def main(argv):
     (opts, args) = parser.parse_args(argv)
     yaml_config = "./hyperparam_tables/{network_version}.yaml"
     yaml_config = yaml_config.format(network_version=opts.network_version)
-    with open(yaml_config) as f:
-        NetworkConfig.initialize(yaml.load(f, SafeLoader))
+    hyperparam_path = "./hyperparam_tables/common_iter.yaml"
+    with open(yaml_config) as f, open(hyperparam_path) as h:
+        NetworkConfig.initialize(yaml.load(f, SafeLoader), yaml.load(h, SafeLoader))
 
     network_config = NetworkConfig.getInstance().get_network_config()
+    hyperparam_config = NetworkConfig.getInstance().get_hyper_params()
     print(network_config)
+    print(hyperparam_config)
 
     update_config(opts)
     print(opts)
@@ -100,8 +103,9 @@ def main(argv):
     print("---------------------------------------------------------------------------")
 
     # compute total progress
-    needed_progress = int((network_config["max_epochs"]) * (train_count / network_config["load_size"]))
-    current_progress = int(start_epoch * (train_count / network_config["load_size"]))
+    load_size = network_config["load_size"][global_config.server_config]
+    needed_progress = int((network_config["max_epochs"]) * (train_count / load_size))
+    current_progress = int(start_epoch * (train_count / load_size))
     pbar = tqdm(total=needed_progress, disable=global_config.disable_progress_bar)
     pbar.update(current_progress)
 

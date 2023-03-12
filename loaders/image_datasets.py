@@ -48,7 +48,7 @@ class GenericImageDataset(data.Dataset):
 
             depth_img = cv2.imread(self.exr_list[idx], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
             depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
-            depth_img = self.initial_op(depth_img)
+            depth_img = 1.0 - self.initial_op(depth_img)
 
             segmentation_img = cv2.imread(self.segmentation_list[idx])
             segmentation_img = cv2.cvtColor(segmentation_img, cv2.COLOR_BGR2RGB)

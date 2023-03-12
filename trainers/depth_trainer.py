@@ -19,9 +19,12 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
 
     def initialize_train_config(self):
         network_config = NetworkConfig.getInstance().get_network_config()
+        hyper_params = NetworkConfig.getInstance().get_hyper_params()
         general_config = global_config.general_config
+        server_config = global_config.server_config
+
         self.iteration = general_config["iteration"]
-        self.hyperparams_table = network_config["hyperparams"][self.iteration]
+        self.hyperparams_table = hyper_params["hyperparams"][self.iteration]
         self.use_bce = self.hyperparams_table["is_bce"]
         self.adv_weight = self.hyperparams_table["adv_weight"]
 
@@ -37,8 +40,8 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.fp16_scaler = amp.GradScaler()  # for automatic mixed precision
         self.visdom_reporter = plot_utils.VisdomReporter.getInstance()
 
-        self.load_size = network_config["load_size"]
-        self.batch_size = network_config["batch_size"]
+        self.load_size = network_config["load_size"][server_config]
+        self.batch_size = network_config["batch_size"][server_config]
 
         self.stopper_method = early_stopper.EarlyStopper(network_config["min_epochs"], early_stopper.EarlyStopperMethod.L1_TYPE, 1000)
         self.stop_result = False
@@ -256,6 +259,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
     def visdom_visualize(self, input_map, label="Train"):
         input_rgb = input_map["rgb"]
         rgb2target = self.test(input_map)
+        rgb2target = tensor_utils.normalize_to_01(rgb2target)
 
         self.visdom_reporter.plot_image(input_rgb, str(label) + " RGB Images - " + self.NETWORK_VERSION + str(self.iteration))
         self.visdom_reporter.plot_image(rgb2target, str(label) + " Depth-Like images - " + self.NETWORK_VERSION + str(self.iteration))
