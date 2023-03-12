@@ -38,8 +38,8 @@ echo "$OUTPUT_DIR/$DATASET_NAME.zip"
 
 zip -F "$OUTPUT_DIR/$DATASET_NAME.zip" --out "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
 unzip "$OUTPUT_DIR/$DATASET_NAME+fixed.zip" -d "$OUTPUT_DIR"
-mv "$OUTPUT_DIR/$DATASET_NAME+fixed" "$OUTPUT_DIR/$DATASET_NAME"
-rm -rf "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
+#mv "$OUTPUT_DIR/$DATASET_NAME+fixed" "$OUTPUT_DIR/$DATASET_NAME"
+#rm -rf "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
 
 #if [ $SERVER_CONFIG == 1 ]
 #then

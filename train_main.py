@@ -62,10 +62,10 @@ def update_config(opts):
 
 
 def main(argv):
-    device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
+    (opts, args) = parser.parse_args(argv)
+    device = torch.device(opts.cuda_device if (torch.cuda.is_available()) else "cpu")
     print("Device: %s" % device)
 
-    (opts, args) = parser.parse_args(argv)
     yaml_config = "./hyperparam_tables/{network_version}.yaml"
     yaml_config = yaml_config.format(network_version=opts.network_version)
     hyperparam_path = "./hyperparam_tables/common_iter.yaml"
