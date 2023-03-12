@@ -38,12 +38,12 @@ def update_config(opts):
     if(global_config.server_config == 0): #COARE
         global_config.general_config["num_workers"] = 6
         global_config.disable_progress_bar = True
-
+        global_config.path = "/scratch1/scratch2/neil.delgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using COARE configuration. Workers: ", global_config.general_config["num_workers"])
 
     elif(global_config.server_config == 1): #CCS Cloud
         global_config.general_config["num_workers"] = 12
-
+        global_config.path = "/home/jupyter-neil.delgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using CCS configuration. Workers: ", global_config.general_config["num_workers"])
 
     elif(global_config.server_config == 2): #RTX 2080Ti
@@ -54,11 +54,12 @@ def update_config(opts):
     elif(global_config.server_config == 3):
         global_config.general_config["num_workers"] = 12
         global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
-        global_config.path = global_config.path.format(dataset_version = network_config["dataset_version"])
-        global_config.exr_path = global_config.path + "*.exr"
-        global_config.rgb_path = global_config.path + "*.camera.png"
-        global_config.segmentation_path = global_config.path + "*.semantic segmentation.png"
         print("Using RTX 3090 configuration. Workers: ", global_config.general_config["num_workers"])
+
+    global_config.path = global_config.path.format(dataset_version=network_config["dataset_version"])
+    global_config.exr_path = global_config.path + "*.exr"
+    global_config.rgb_path = global_config.path + "*.camera.png"
+    global_config.segmentation_path = global_config.path + "*.semantic segmentation.png"
 
 
 def main(argv):
