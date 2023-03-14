@@ -25,54 +25,58 @@ parser.add_option('--server_config', type=int, help="Is running on COARE?", defa
 parser.add_option('--cuda_device', type=str, help="CUDA Device?", default="cuda:0")
 parser.add_option('--img_to_load', type=int, help="Image to load?", default=-1)
 parser.add_option('--network_version', type=str, default="vXX.XX")
-parser.add_option('--iteration')
+parser.add_option('--iteration', type=int, default=1)
 parser.add_option('--plot_enabled', type=int, default=1)
 
 def update_config(opts):
     global_config.server_config = opts.server_config
     global_config.plot_enabled = opts.plot_enabled
     global_config.general_config["network_version"] = opts.network_version
-    global_config.general_config["iteration"] = 1
+    global_config.general_config["iteration"] = opts.iteration
     network_config = NetworkConfig.getInstance().get_network_config()
 
-    if(global_config.server_config == 1): #COARE
+    if(global_config.server_config == 0): #COARE
         global_config.general_config["num_workers"] = 6
         global_config.disable_progress_bar = True
-
+        global_config.path = "/scratch1/scratch2/neil.delgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using COARE configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif(global_config.server_config == 2): #CCS Cloud
+    elif(global_config.server_config == 1): #CCS Cloud
         global_config.general_config["num_workers"] = 12
-
+        global_config.path = "/home/jupyter-neil.delgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using CCS configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif(global_config.server_config == 3): #RTX 2080Ti
+    elif(global_config.server_config == 2): #RTX 2080Ti
         global_config.general_config["num_workers"] = 6
 
         print("Using RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif(global_config.server_config == 4):
+    elif(global_config.server_config == 3):
         global_config.general_config["num_workers"] = 12
         global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
-        global_config.path = global_config.path.format(dataset_version = network_config["dataset_version"])
-        global_config.exr_path = global_config.path + "*.exr"
-        global_config.rgb_path = global_config.path + "*.camera.png"
-        global_config.segmentation_path = global_config.path + "*.semantic segmentation.png"
         print("Using RTX 3090 configuration. Workers: ", global_config.general_config["num_workers"])
+
+    global_config.path = global_config.path.format(dataset_version=network_config["dataset_version"])
+    global_config.exr_path = global_config.path + "*.exr"
+    global_config.rgb_path = global_config.path + "*.camera.png"
+    global_config.segmentation_path = global_config.path + "*.semantic segmentation.png"
 
 
 def main(argv):
-    device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
+    (opts, args) = parser.parse_args(argv)
+    device = torch.device(opts.cuda_device if (torch.cuda.is_available()) else "cpu")
     print("Device: %s" % device)
 
-    (opts, args) = parser.parse_args(argv)
     yaml_config = "./hyperparam_tables/{network_version}.yaml"
     yaml_config = yaml_config.format(network_version=opts.network_version)
-    with open(yaml_config) as f:
-        NetworkConfig.initialize(yaml.load(f, SafeLoader))
+    hyperparam_path = "./hyperparam_tables/common_iter.yaml"
+    with open(yaml_config) as f, open(hyperparam_path) as h:
+        NetworkConfig.initialize(yaml.load(f, SafeLoader), yaml.load(h, SafeLoader))
 
     network_config = NetworkConfig.getInstance().get_network_config()
+    hyperparam_config = NetworkConfig.getInstance().get_hyper_params()
     print(network_config)
+    print(hyperparam_config)
 
     update_config(opts)
     print(opts)
@@ -84,13 +88,13 @@ def main(argv):
     exr_path = global_config.exr_path
     segmentation_path = global_config.segmentation_path
 
-    print("Dataset path: ", global_config.path)
+    print("Dataset path: ", rgb_path)
 
     plot_utils.VisdomReporter.initialize()
     visdom_reporter = plot_utils.VisdomReporter.getInstance()
 
-    train_loader, dataset_count = dataset_loader.load_train_dataset(rgb_path, exr_path, segmentation_path)
-    test_loader, dataset_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
+    train_loader, train_count = dataset_loader.load_train_dataset(rgb_path, exr_path, segmentation_path)
+    test_loader, test_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
     dt = depth_trainer.DepthTrainer(device)
 
     iteration = 0
@@ -100,8 +104,9 @@ def main(argv):
     print("---------------------------------------------------------------------------")
 
     # compute total progress
-    needed_progress = int((network_config["max_epochs"]) * (dataset_count / network_config["load_size"]))
-    current_progress = int(start_epoch * (dataset_count / network_config["load_size"]))
+    load_size = network_config["load_size"][global_config.server_config]
+    needed_progress = int((network_config["max_epochs"]) * (train_count / load_size))
+    current_progress = int(start_epoch * (train_count / load_size))
     pbar = tqdm(total=needed_progress, disable=global_config.disable_progress_bar)
     pbar.update(current_progress)
 
@@ -124,7 +129,7 @@ def main(argv):
             if(dt.is_stop_condition_met()):
                 break
 
-            if(i % 100 == 0):
+            if(iteration % 200 == 0):
                 dt.save_states(epoch, iteration, True)
 
                 if(global_config.plot_enabled == 1):

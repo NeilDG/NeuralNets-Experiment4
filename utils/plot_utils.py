@@ -26,9 +26,9 @@ class VisdomReporter:
         return VisdomReporter._sharedInstance
 
     def __init__(self):
-        if(global_config.server_config == 1):
+        if(global_config.server_config == 0):
             self.vis = visdom.Visdom(SALIKSIK_SERVER, use_incoming_socket=False, port=8097) #TODO: Note that this is set to TRUE for observation.
-        elif(global_config.server_config == 2):
+        elif(global_config.server_config == 1):
             self.vis = None
         else:
             self.vis= visdom.Visdom()
@@ -98,7 +98,7 @@ class VisdomReporter:
         colors = ['r', 'g', 'black', 'darkorange', 'olive', 'palevioletred', 'rosybrown', 'cyan', 'slategray', 'darkmagenta', 'linen', 'chocolate']
         index = 0
         
-        x = [i for i in range(iteration, iteration + len(losses_dict[global_config.LIKENESS_LOSS_KEY]))]
+        x = [i for i in range(iteration, iteration + len(losses_dict["g_loss"]))]
         COLS = 3; ROWS = 4
         fig, ax = plt.subplots(ROWS, COLS, sharex=True)
         fig.set_size_inches(9, 9)

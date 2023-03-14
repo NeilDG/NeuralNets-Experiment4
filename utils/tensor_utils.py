@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 import global_config
 from torchvision.transforms import functional as transform_functional
+from PIL import Image
 
 # for attaching hooks on pretrained models
 class SaveFeatures(nn.Module):
@@ -49,6 +50,20 @@ class CombineFeatures(nn.Module):
     def close(self):
         self.hook.remove()
 
+
+
+def kitti_depth_read(filename):
+    # loads depth map D from png file
+    # and returns it as a numpy array,
+    # for details see readme.txt
+
+    depth_png = np.array(Image.open(filename), dtype=int)
+    # make sure we have a proper 16bit depth map here.. not 8bit!
+    assert(np.max(depth_png) > 255)
+
+    depth = depth_png.astype(np.float) / 256.
+    depth[depth_png == 0] = -1.
+    return depth
 
 def normalize_to_matplotimg(img_tensor, batch_idx, std, mean):
     img = img_tensor[batch_idx, :, :, :].numpy()
