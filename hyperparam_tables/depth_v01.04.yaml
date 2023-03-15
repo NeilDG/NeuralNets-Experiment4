@@ -11,7 +11,7 @@ weight_decay: 0.0
 dropout_rate: 0.0
 augment_key: "augmix"
 
-g_lr: 0.0002
+g_lr: 0.0005
 d_lr: 0.0005
 min_epochs: 15
 max_epochs: 20

@@ -68,22 +68,28 @@ def main(argv):
     device = torch.device(opts.cuda_device if (torch.cuda.is_available()) else "cpu")
     print("Device: %s" % device)
 
+    manualSeed = 0
+    random.seed(manualSeed)
+    torch.manual_seed(manualSeed)
+    np.random.seed(manualSeed)
+
     yaml_config = "./hyperparam_tables/{network_version}.yaml"
     yaml_config = yaml_config.format(network_version=opts.network_version)
     hyperparam_path = "./hyperparam_tables/common_iter.yaml"
     with open(yaml_config) as f, open(hyperparam_path) as h:
         NetworkConfig.initialize(yaml.load(f, SafeLoader), yaml.load(h, SafeLoader))
 
-    network_config = NetworkConfig.getInstance().get_network_config()
-    hyperparam_config = NetworkConfig.getInstance().get_hyper_params()
-    print(network_config)
-    print(hyperparam_config)
-
     update_config(opts)
     print(opts)
     print("=====================BEGIN============================")
     print("Server config? %d Has GPU available? %d Count: %d" % (global_config.server_config, torch.cuda.is_available(), torch.cuda.device_count()))
     print("Torch CUDA version: %s" % torch.version.cuda)
+
+    network_config = NetworkConfig.getInstance().get_network_config()
+    hyperparam_config = NetworkConfig.getInstance().get_hyper_params()
+    network_iteration = global_config.general_config["iteration"]
+    hyperparams_table = hyperparam_config["hyperparams"][network_iteration]
+    print("Network iteration:", str(network_iteration), " hyper parameters: ", hyperparams_table)
 
     rgb_path = global_config.rgb_path
     exr_path = global_config.exr_path

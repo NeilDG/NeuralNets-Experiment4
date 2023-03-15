@@ -28,6 +28,7 @@ sbatch --dependency=afterany:412902 -w saliksik-gpu-06 script_2.slurm
 sbatch --dependency=afterany:338540 script_2.slurm
 
 sbatch script_debug.slurm
+sbatch script_debug.slurm --iteration=1
 sbatch slurm_download.sh
 sbatch script_1.slurm
 sbatch script_2.slurm
