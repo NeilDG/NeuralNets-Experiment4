@@ -9,8 +9,9 @@
 #SBATCH --mail-user=neil.delgallego@dlsu.edu.ph
 #SBATCH --mail-type=END
 
-ITERATION=1
+ITERATION=$1
 echo "CUDA_DEVICE=/dev/nvidia/$CUDA_VISIBLE_DEVICES"
+echo "Set iteration to "$ITERATION
 nvidia-smi
 
 # prepare working environment
