@@ -6,7 +6,6 @@
 #SBATCH --output=script_debug.out
 #SBATCH --mail-user=neil.delgallego@dlsu.edu.ph
 #SBATCH --mail-type=END
-#SBATCH --iteration=1
 
 ITERATION=$1
 echo "CUDA_DEVICE=/dev/nvidia/$CUDA_VISIBLE_DEVICES"
