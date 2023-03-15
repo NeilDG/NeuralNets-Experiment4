@@ -184,7 +184,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
             self.optimizerG.zero_grad()
             self.G_depth.train()
             rgb2target = self.G_depth(input_rgb)
-            SM_likeness_loss = self.l1_loss(rgb2target, target_tensor) * self.hyperparams_table["l1_weight"]
+            SM_l1_loss = self.l1_loss(rgb2target, target_tensor) * self.hyperparams_table["l1_weight"]
             SM_lpip_loss = self.lpip_loss(rgb2target, target_tensor) * self.hyperparams_table["lpip_weight"]
             SM_smooth_loss = self.get_smooth_loss(rgb2target, target_tensor) * self.hyperparams_table["disp_weight"]
             mask_tensor = (target_tensor > 0.0)
@@ -195,7 +195,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
             real_tensor = torch.ones_like(prediction)
             SM_adv_loss = self.adversarial_loss(prediction, real_tensor) * self.adv_weight
 
-            errG = SM_likeness_loss + SM_lpip_loss + SM_smooth_loss + SM_grad_loss + SM_adv_loss
+            errG = SM_l1_loss + SM_lpip_loss + SM_smooth_loss + SM_grad_loss + SM_adv_loss
 
             self.fp16_scaler.scale(errG).backward()
             if (accum_batch_size % self.batch_size == 0):
@@ -207,11 +207,11 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
             if (iteration > 50):
                 self.losses_dict_s[self.G_LOSS_KEY].append(errG.item())
                 self.losses_dict_s[self.D_OVERALL_LOSS_KEY].append(errD.item())
-                self.losses_dict_s[self.LIKENESS_LOSS_KEY].append(SM_likeness_loss.item())
+                self.losses_dict_s[self.LIKENESS_LOSS_KEY].append(SM_l1_loss.item())
                 self.losses_dict_s[self.LPIP_LOSS_KEY].append(SM_lpip_loss.item())
                 self.losses_dict_s[self.G_ADV_LOSS_KEY].append(SM_adv_loss.item())
                 self.losses_dict_s[self.DISP_SMOOTH_LOSS_KEY].append(SM_smooth_loss.item())
-                self.losses_dict_s[self.GRADIENT_LOSS_KEY].append(SM_grad_loss.item())
+                # self.losses_dict_s[self.GRADIENT_LOSS_KEY].append(SM_grad_loss.item()) #bug: sometimes item() throws an invalid type error
                 # self.losses_dict_s[self.SSI_LOSS_KEY].append(SM_ssi_loss.item())
                 self.losses_dict_s[self.D_A_FAKE_LOSS_KEY].append(D_SM_fake_loss.item())
                 self.losses_dict_s[self.D_A_REAL_LOSS_KEY].append(D_SM_real_loss.item())

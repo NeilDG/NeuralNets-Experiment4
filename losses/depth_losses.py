@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -80,19 +81,6 @@ def gradient_loss(prediction, target, mask, reduction=reduction_batch_based):
     return reduction(image_loss, M)
 
 
-class MSELoss(nn.Module):
-    def __init__(self, reduction='batch-based'):
-        super().__init__()
-
-        if reduction == 'batch-based':
-            self.__reduction = reduction_batch_based
-        else:
-            self.__reduction = reduction_image_based
-
-    def forward(self, prediction, target, mask):
-        return mse_loss(prediction, target, mask, reduction=self.__reduction)
-
-
 class GradientLoss(nn.Module):
     def __init__(self, scales=4, reduction='batch-based'):
         super().__init__()
@@ -116,11 +104,12 @@ class GradientLoss(nn.Module):
         return total
 
 
+#TODO: Not working. Has errors in tensor sizes.
 class ScaleAndShiftInvariantLoss(nn.Module):
     def __init__(self, alpha=0.5, scales=4, reduction='batch-based'):
         super().__init__()
 
-        self.__data_loss = MSELoss(reduction=reduction)
+        self.__data_loss = nn.MSELoss()
         self.__regularization_loss = GradientLoss(scales=scales, reduction=reduction)
         self.__alpha = alpha
 
@@ -129,9 +118,13 @@ class ScaleAndShiftInvariantLoss(nn.Module):
     def forward(self, prediction, target, mask):
 
         scale, shift = compute_scale_and_shift(prediction, target, mask)
-        self.__prediction_ssi = scale.view(-1, 1, 1) * prediction + shift.view(-1, 1, 1)
+        prediction = torch.squeeze(prediction)
+        print("Old shapes: ", np.shape(scale), np.shape(shift), np.shape(prediction))
+        # self.__prediction_ssi = scale.view(-1, 1, 1) * prediction + shift.view(-1, 1, 1)
+        # self.__prediction_ssi = scale * prediction + shift
+        self.__prediction_ssi = prediction
 
-        total = self.__data_loss(self.__prediction_ssi, target, mask)
+        total = self.__data_loss(self.__prediction_ssi * mask, target * mask)
         if self.__alpha > 0:
             total += self.__alpha * self.__regularization_loss(self.__prediction_ssi, target, mask)
 

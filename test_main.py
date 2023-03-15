@@ -34,33 +34,33 @@ def update_config(opts):
     global_config.general_config["network_version"] = opts.network_version
     global_config.general_config["iteration"] = opts.iteration
     global_config.general_config["test_size"] = 128
-
     network_config = NetworkConfig.getInstance().get_network_config()
 
-    if(global_config.server_config == 1): #COARE
+    if (global_config.server_config == 0):  # COARE
         global_config.general_config["num_workers"] = 6
         global_config.disable_progress_bar = True
-
+        global_config.path = "/scratch1/scratch2/neil.delgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using COARE configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif(global_config.server_config == 2): #CCS Cloud
+    elif (global_config.server_config == 1):  # CCS Cloud
         global_config.general_config["num_workers"] = 12
-
+        global_config.path = "/home/jupyter-neil.delgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using CCS configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif(global_config.server_config == 3): #RTX 2080Ti
+    elif (global_config.server_config == 2):  # RTX 2080Ti
         global_config.general_config["num_workers"] = 6
 
         print("Using RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif(global_config.server_config == 4):
+    elif (global_config.server_config == 3):
         global_config.general_config["num_workers"] = 12
         global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
-        global_config.path = global_config.path.format(dataset_version = network_config["dataset_version"])
-        global_config.exr_path = global_config.path + "*.exr"
-        global_config.rgb_path = global_config.path + "*.camera.png"
-        global_config.segmentation_path = global_config.path + "*.semantic segmentation.png"
         print("Using RTX 3090 configuration. Workers: ", global_config.general_config["num_workers"])
+
+    global_config.path = global_config.path.format(dataset_version=network_config["dataset_version"])
+    global_config.exr_path = global_config.path + "*.exr"
+    global_config.rgb_path = global_config.path + "*.camera.png"
+    global_config.segmentation_path = global_config.path + "*.semantic segmentation.png"
 
 
 def main(argv):
@@ -70,8 +70,9 @@ def main(argv):
     (opts, args) = parser.parse_args(argv)
     yaml_config = "./hyperparam_tables/{network_version}.yaml"
     yaml_config = yaml_config.format(network_version=opts.network_version)
-    with open(yaml_config) as f:
-        NetworkConfig.initialize(yaml.load(f, SafeLoader))
+    hyperparam_path = "./hyperparam_tables/common_iter.yaml"
+    with open(yaml_config) as f, open(hyperparam_path) as h:
+        NetworkConfig.initialize(yaml.load(f, SafeLoader), yaml.load(h, SafeLoader))
 
     update_config(opts)
     print(opts)

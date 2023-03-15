@@ -27,6 +27,7 @@ parser.add_option('--img_to_load', type=int, help="Image to load?", default=-1)
 parser.add_option('--network_version', type=str, default="vXX.XX")
 parser.add_option('--iteration', type=int, default=1)
 parser.add_option('--plot_enabled', type=int, default=1)
+parser.add_option('--save_every_iter', type=int, default=400)
 
 def update_config(opts):
     global_config.server_config = opts.server_config
@@ -129,7 +130,7 @@ def main(argv):
             if(dt.is_stop_condition_met()):
                 break
 
-            if(iteration % 200 == 0):
+            if(iteration % opts.save_every_iter == 0):
                 dt.save_states(epoch, iteration, True)
 
                 if(global_config.plot_enabled == 1):
