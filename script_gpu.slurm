@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J D_1
+#SBATCH -J D_GPU
 #SBATCH --partition=gpu
 #SBATCH --qos=12c-1h_2gpu
 #SBATCH --cpus-per-task=6
