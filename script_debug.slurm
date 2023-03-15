@@ -19,7 +19,7 @@ module load cuda/10.1_cudnn-7.6.5
 source activate NeilGAN_V2
 
 srun python train_main.py \
---network_version="depth_v01.05" --iteration=$ITERATION --server_config=1 --plot_enabled=0 --img_to_load=-1
+--network_version="depth_v01.05" --iteration=$ITERATION --server_config=0 --plot_enabled=0 --img_to_load=-1
 
 conda deactivate
 
