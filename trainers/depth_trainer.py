@@ -32,8 +32,8 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.l1_loss = nn.L1Loss()
         self.mse_loss = nn.MSELoss()
         self.bce_loss = nn.BCEWithLogitsLoss()
-        self.gradient_loss = depth_losses.GradientLoss()
-        self.ssi_loss = depth_losses.ScaleAndShiftInvariantLoss()
+        self.gradient_loss = depth_losses.GradLoss()
+        self.rmse_loss = depth_losses.RMSEDepthLoss()
 
         self.D_SM_pool = image_pool.ImagePool(50)
 
@@ -104,10 +104,9 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.CYCLE_LOSS_KEY = "cyc"
         self.G_ADV_LOSS_KEY = "g_adv"
         self.LIKENESS_LOSS_KEY = "likeness"
-        self.LPIP_LOSS_KEY = "lpip"
-        self.SSIM_LOSS_KEY = "ssim"
-        self.DISP_SMOOTH_LOSS_KEY = "disp_loss"
+        self.RMSE_LOSS_KEY = "rmse_loss"
         self.GRADIENT_LOSS_KEY = "grad_loss"
+        self.SMOOTH_LOSS_KEY = "smooth_loss"
         self.SSI_LOSS_KEY = "ssi_loss"
 
         self.D_OVERALL_LOSS_KEY = "d_loss"
@@ -122,10 +121,10 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.losses_dict_s[self.G_LOSS_KEY] = []
         self.losses_dict_s[self.D_OVERALL_LOSS_KEY] = []
         self.losses_dict_s[self.LIKENESS_LOSS_KEY] = []
-        self.losses_dict_s[self.LPIP_LOSS_KEY] = []
         self.losses_dict_s[self.G_ADV_LOSS_KEY] = []
-        self.losses_dict_s[self.DISP_SMOOTH_LOSS_KEY] = []
+        self.losses_dict_s[self.RMSE_LOSS_KEY] = []
         self.losses_dict_s[self.GRADIENT_LOSS_KEY] = []
+        self.losses_dict_s[self.SMOOTH_LOSS_KEY] = []
         self.losses_dict_s[self.SSI_LOSS_KEY] = []
         self.losses_dict_s[self.D_A_FAKE_LOSS_KEY] = []
         self.losses_dict_s[self.D_A_REAL_LOSS_KEY] = []
@@ -134,10 +133,10 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.caption_dict_s[self.G_LOSS_KEY] = "Shadow G loss per iteration"
         self.caption_dict_s[self.D_OVERALL_LOSS_KEY] = "D loss per iteration"
         self.caption_dict_s[self.LIKENESS_LOSS_KEY] = "L1 loss per iteration"
-        self.caption_dict_s[self.LPIP_LOSS_KEY] = "LPIPS loss per iteration"
         self.caption_dict_s[self.G_ADV_LOSS_KEY] = "G adv loss per iteration"
-        self.caption_dict_s[self.DISP_SMOOTH_LOSS_KEY] = "Disp smooth loss per iteration"
+        self.caption_dict_s[self.RMSE_LOSS_KEY] = "RMSE loss per iteration"
         self.caption_dict_s[self.GRADIENT_LOSS_KEY] = "Gradient loss per iteration"
+        self.caption_dict_s[self.SMOOTH_LOSS_KEY] = "Smooth loss per iteration"
         self.caption_dict_s[self.SSI_LOSS_KEY] = "Scale-invariant loss per iteration"
         self.caption_dict_s[self.D_A_FAKE_LOSS_KEY] = "D fake loss per iteration"
         self.caption_dict_s[self.D_A_REAL_LOSS_KEY] = "D real loss per iteration"
@@ -184,18 +183,17 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
             self.optimizerG.zero_grad()
             self.G_depth.train()
             rgb2target = self.G_depth(input_rgb)
-            SM_likeness_loss = self.l1_loss(rgb2target, target_tensor) * self.hyperparams_table["l1_weight"]
-            SM_lpip_loss = self.lpip_loss(rgb2target, target_tensor) * self.hyperparams_table["lpip_weight"]
+            SM_l1_loss = self.l1_loss(rgb2target, target_tensor) * self.hyperparams_table["l1_weight"]
             SM_smooth_loss = self.get_smooth_loss(rgb2target, target_tensor) * self.hyperparams_table["disp_weight"]
-            mask_tensor = (target_tensor > 0.0)
-            SM_grad_loss = self.gradient_loss(rgb2target, target_tensor, mask_tensor) * self.hyperparams_table["grad_weight"]
-            # SM_ssi_loss = self.ssi_loss(rgb2target, target_tensor, mask_tensor) * self.hyperparams_table["ssi_weight"]
+            SM_grad_loss = self.gradient_loss(rgb2target, target_tensor) * self.hyperparams_table["grad_weight"]
+            SM_rmse_loss = self.rmse_loss(rgb2target, target_tensor) * self.hyperparams_table["rmse_weight"]
+            # SM_rmse_log_loss = self.rmse_loss(torch.log(rgb2target), torch.log(target_tensor)) * self.hyperparams_table["rmse_log_weight"]
 
             prediction = self.D_depth(rgb2target)
             real_tensor = torch.ones_like(prediction)
             SM_adv_loss = self.adversarial_loss(prediction, real_tensor) * self.adv_weight
 
-            errG = SM_likeness_loss + SM_lpip_loss + SM_smooth_loss + SM_grad_loss + SM_adv_loss
+            errG = SM_l1_loss + SM_smooth_loss + SM_grad_loss + SM_rmse_loss + SM_adv_loss
 
             self.fp16_scaler.scale(errG).backward()
             if (accum_batch_size % self.batch_size == 0):
@@ -207,12 +205,11 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
             if (iteration > 50):
                 self.losses_dict_s[self.G_LOSS_KEY].append(errG.item())
                 self.losses_dict_s[self.D_OVERALL_LOSS_KEY].append(errD.item())
-                self.losses_dict_s[self.LIKENESS_LOSS_KEY].append(SM_likeness_loss.item())
-                self.losses_dict_s[self.LPIP_LOSS_KEY].append(SM_lpip_loss.item())
+                self.losses_dict_s[self.LIKENESS_LOSS_KEY].append(SM_l1_loss.item())
                 self.losses_dict_s[self.G_ADV_LOSS_KEY].append(SM_adv_loss.item())
-                self.losses_dict_s[self.DISP_SMOOTH_LOSS_KEY].append(SM_smooth_loss.item())
+                self.losses_dict_s[self.RMSE_LOSS_KEY].append(SM_rmse_loss.item())
                 self.losses_dict_s[self.GRADIENT_LOSS_KEY].append(SM_grad_loss.item())
-                # self.losses_dict_s[self.SSI_LOSS_KEY].append(SM_ssi_loss.item())
+                self.losses_dict_s[self.SMOOTH_LOSS_KEY].append(SM_smooth_loss.item())
                 self.losses_dict_s[self.D_A_FAKE_LOSS_KEY].append(D_SM_fake_loss.item())
                 self.losses_dict_s[self.D_A_REAL_LOSS_KEY].append(D_SM_real_loss.item())
 

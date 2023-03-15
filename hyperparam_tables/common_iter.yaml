@@ -1,8 +1,11 @@
 # Common hyperparameters for different network iterations
+# 0 - l1, 1 - adv, 2 - lpips, 3 - disparity smoothness, 4 - gradient, 5 - l1 log
 hyperparams:
   1:
     l1_weight: 2.0
-    lpip_weight: 0.0
+    l1_log_weight: 0.0
+    rmse_weight: 0.0
+    rmse_log_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01
     grad_weight: 1.0
@@ -10,7 +13,9 @@ hyperparams:
 
   2:
     l1_weight: 2.0
-    lpip_weight: 0.0
+    l1_log_weight: 0.0
+    rmse_weight: 0.0
+    rmse_log_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01
     grad_weight: 1.0
@@ -18,7 +23,9 @@ hyperparams:
 
   3:
     l1_weight: 1.0
-    lpip_weight: 0.0
+    l1_log_weight: 0.0
+    rmse_weight: 0.0
+    rmse_log_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01
     grad_weight: 1.0
@@ -26,24 +33,52 @@ hyperparams:
 
   4:
     l1_weight: 1.0
-    lpip_weight: 0.0
+    l1_log_weight: 0.0
+    rmse_weight: 0.0
+    rmse_log_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01
     grad_weight: 1.0
     is_bce: 1
 
   5:
-    l1_weight: 1.0
-    lpip_weight: 0.0
+    l1_weight: 0.0
+    l1_log_weight: 0.0
+    rmse_weight: 1.0
+    rmse_log_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.0
-    grad_weight: 0.0
+    grad_weight: 1.0
     is_bce: 0
 
   6:
-    l1_weight: 1.0
-    lpip_weight: 0.0
+    l1_weight: 0.0
+    l1_log_weight: 0.0
+    rmse_weight: 1.0
+    rmse_log_weight: 0.0
+    adv_weight: 1.0
+    disp_weight: 0.0
+    grad_weight: 1.0
+    is_bce: 1
+
+  7:
+    l1_weight: 10.0
+    l1_log_weight: 0.0
+    rmse_weight: 0.0
+    rmse_log_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.0
     grad_weight: 0.0
+    ssi_weight: 0.0
+    is_bce: 1
+
+  8:
+    l1_weight: 10.0
+    l1_log_weight: 0.0
+    rmse_weight: 0.0
+    rmse_log_weight: 0.0
+    adv_weight: 1.0
+    disp_weight: 0.0
+    grad_weight: 0.0
+    ssi_weight: 0.0
     is_bce: 1

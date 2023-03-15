@@ -19,7 +19,7 @@ import kornia.augmentation as K
 class GenericImageDataset(data.Dataset):
     def __init__(self, img_length, rgb_list, exr_list, segmentation_list, transform_config):
         network_config = NetworkConfig.getInstance().get_network_config()
-
+        self.augment_mode = network_config["augment_key"]
         self.img_length = img_length
         self.rgb_list = rgb_list
         self.exr_list = exr_list
@@ -28,11 +28,29 @@ class GenericImageDataset(data.Dataset):
 
         self.norm_op = transforms.Normalize((0.5, ), (0.5, ))
 
-        self.initial_op = transforms.Compose([
-            transforms.ToPILImage(),
-            transforms.Resize((256, 256)),
-            transforms.ToTensor()
-        ])
+        if ("augmix" in self.augment_mode and self.transform_config == 1):
+            self.initial_rgb_op = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.Resize((256, 256)),
+                transforms.RandomHorizontalFlip(0.5),
+                transforms.RandomVerticalFlip(0.5),
+                transforms.AugMix(),
+                transforms.ToTensor()])
+
+            self.initial_op = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.Resize((256, 256)),
+                transforms.RandomHorizontalFlip(0.5),
+                transforms.RandomVerticalFlip(0.5),
+                transforms.ToTensor()])
+        else:
+            self.initial_rgb_op = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.Resize((256, 256)),
+                transforms.ToTensor()
+            ])
+
+            self.initial_op = self.initial_rgb_op
 
         if (self.transform_config == 1):
             patch_size = network_config["patch_size"]
@@ -41,37 +59,40 @@ class GenericImageDataset(data.Dataset):
             self.patch_size = (256, 256)
 
     def __getitem__(self, idx):
-        try:
-            rgb_img = cv2.imread(self.rgb_list[idx])
-            rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2RGB)
-            rgb_img = self.initial_op(rgb_img)
+        # try:
+        state = torch.get_rng_state()
+        rgb_img = cv2.imread(self.rgb_list[idx])
+        rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2RGB)
+        rgb_img = self.initial_rgb_op(rgb_img)
 
-            depth_img = cv2.imread(self.exr_list[idx], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
-            depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
-            depth_img = 1.0 - self.initial_op(depth_img)
+        torch.set_rng_state(state)
+        depth_img = cv2.imread(self.exr_list[idx], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+        depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
+        depth_img = 1.0 - self.initial_op(depth_img)
 
-            segmentation_img = cv2.imread(self.segmentation_list[idx])
-            segmentation_img = cv2.cvtColor(segmentation_img, cv2.COLOR_BGR2RGB)
-            segmentation_img = self.initial_op(segmentation_img)
+        torch.set_rng_state(state)
+        segmentation_img = cv2.imread(self.segmentation_list[idx])
+        segmentation_img = cv2.cvtColor(segmentation_img, cv2.COLOR_BGR2RGB)
+        segmentation_img = self.initial_op(segmentation_img)
 
-            if (self.transform_config == 1):
-                crop_indices = transforms.RandomCrop.get_params(rgb_img, output_size=self.patch_size)
-                i, j, h, w = crop_indices
+        if (self.transform_config == 1):
+            crop_indices = transforms.RandomCrop.get_params(rgb_img, output_size=self.patch_size)
+            i, j, h, w = crop_indices
 
-                rgb_img = transforms.functional.crop(rgb_img, i, j, h, w)
-                depth_img = transforms.functional.crop(depth_img, i, j, h, w)
-                segmentation_img = transforms.functional.crop(segmentation_img, i, j, h, w)
+            rgb_img = transforms.functional.crop(rgb_img, i, j, h, w)
+            depth_img = transforms.functional.crop(depth_img, i, j, h, w)
+            segmentation_img = transforms.functional.crop(segmentation_img, i, j, h, w)
 
-            rgb_img = self.norm_op(rgb_img)
-            depth_img = self.norm_op(depth_img)
-            segmentation_img = self.norm_op(segmentation_img)
-
-        except Exception as e:
-            print("Failed to load: ", self.rgb_list[idx])
-            print("ERROR: ", e)
-            rgb_img = None
-            depth_img = None
-            segmentation_img = None
+        rgb_img = self.norm_op(rgb_img)
+        depth_img = self.norm_op(depth_img)
+        segmentation_img = self.norm_op(segmentation_img)
+        #
+        # except Exception as e:
+        #     print("Failed to load: ", self.rgb_list[idx])
+        #     print("ERROR: ", e)
+        #     rgb_img = None
+        #     depth_img = None
+        #     segmentation_img = None
 
         return rgb_img, depth_img, segmentation_img
 

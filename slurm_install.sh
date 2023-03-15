@@ -22,3 +22,4 @@ pip install opencv-python
 pip install --upgrade pillow
 pip install lpips
 pip install gputil
+pip install matplotlib
