@@ -75,9 +75,3 @@ hyperparams:
     disp_weight: 0.01
     grad_weight: 0.02
     is_bce: 0
-
-  13:
-    ssim_weight: 1.0
-    rmse_weight: 1.0
-    adv_weight: 1.0
-    is_bce: 0
