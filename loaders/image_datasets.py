@@ -2,7 +2,7 @@ import os.path
 import torch
 import os
 
-from config.network_config import NetworkConfig
+from config.network_config import ConfigHolder
 from utils import tensor_utils
 
 os.environ["OPENCV_IO_ENABLE_OPENEXR"]="1"
@@ -18,7 +18,7 @@ import kornia.augmentation as K
 
 class GenericImageDataset(data.Dataset):
     def __init__(self, img_length, rgb_list, exr_list, segmentation_list, transform_config):
-        network_config = NetworkConfig.getInstance().get_network_config()
+        network_config = ConfigHolder.getInstance().get_network_config()
         self.augment_mode = network_config["augment_key"]
         self.img_length = img_length
         self.rgb_list = rgb_list
@@ -67,6 +67,8 @@ class GenericImageDataset(data.Dataset):
 
         torch.set_rng_state(state)
         depth_img = cv2.imread(self.exr_list[idx], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+        # depth_img = cv2.imread(self.exr_list[idx])
+        depth_img = depth_img.astype(np.uint8)
         depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
         depth_img = 1.0 - self.initial_op(depth_img)
 
@@ -83,16 +85,9 @@ class GenericImageDataset(data.Dataset):
             depth_img = transforms.functional.crop(depth_img, i, j, h, w)
             segmentation_img = transforms.functional.crop(segmentation_img, i, j, h, w)
 
-        rgb_img = self.norm_op(rgb_img)
-        depth_img = self.norm_op(depth_img)
-        segmentation_img = self.norm_op(segmentation_img)
-        #
-        # except Exception as e:
-        #     print("Failed to load: ", self.rgb_list[idx])
-        #     print("ERROR: ", e)
-        #     rgb_img = None
-        #     depth_img = None
-        #     segmentation_img = None
+        # rgb_img = self.norm_op(rgb_img)
+        # depth_img = self.norm_op(depth_img)
+        # segmentation_img = self.norm_op(segmentation_img)
 
         return rgb_img, depth_img, segmentation_img
 
@@ -105,7 +100,7 @@ class KittiDepthDataset(data.Dataset):
         self.rgb_list = rgb_list
         self.depth_list = depth_list
 
-        self.norm_op = transforms.Normalize((0.5, ), (0.5, ))
+        # self.norm_op = transforms.Normalize((0.5, ), (0.5, ))
 
         self.initial_op = transforms.Compose([
             transforms.ToPILImage(),
@@ -127,8 +122,8 @@ class KittiDepthDataset(data.Dataset):
         # depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
         depth_img = self.depth_op(depth_img)
 
-        rgb_img = self.norm_op(rgb_img)
-        depth_img = self.norm_op(depth_img)
+        # rgb_img = self.norm_op(rgb_img)
+        # depth_img = self.norm_op(depth_img)
 
         return rgb_img, depth_img
 

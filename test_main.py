@@ -9,7 +9,7 @@ import torchvision.utils as vutils
 import numpy as np
 import matplotlib.pyplot as plt
 
-from config.network_config import NetworkConfig
+from config.network_config import ConfigHolder
 from loaders import dataset_loader
 import global_config
 from utils import plot_utils
@@ -33,8 +33,8 @@ def update_config(opts):
     global_config.plot_enabled = opts.plot_enabled
     global_config.general_config["network_version"] = opts.network_version
     global_config.general_config["iteration"] = opts.iteration
-    global_config.general_config["test_size"] = 128
-    network_config = NetworkConfig.getInstance().get_network_config()
+    global_config.general_config["test_size"] = 64
+    network_config = ConfigHolder.getInstance().get_network_config()
 
     if (global_config.server_config == 0):  # COARE
         global_config.general_config["num_workers"] = 6
@@ -72,7 +72,7 @@ def main(argv):
     yaml_config = yaml_config.format(network_version=opts.network_version)
     hyperparam_path = "./hyperparam_tables/common_iter.yaml"
     with open(yaml_config) as f, open(hyperparam_path) as h:
-        NetworkConfig.initialize(yaml.load(f, SafeLoader), yaml.load(h, SafeLoader))
+        ConfigHolder.initialize(yaml.load(f, SafeLoader), yaml.load(h, SafeLoader))
 
     update_config(opts)
     print(opts)
@@ -80,7 +80,7 @@ def main(argv):
     print("Server config? %d Has GPU available? %d Count: %d" % (global_config.server_config, torch.cuda.is_available(), torch.cuda.device_count()))
     print("Torch CUDA version: %s" % torch.version.cuda)
 
-    network_config = NetworkConfig.getInstance().get_network_config()
+    network_config = ConfigHolder.getInstance().get_network_config()
     print(network_config)
 
     general_config = global_config.general_config
@@ -123,7 +123,8 @@ def main(argv):
     depth_batch = depth_batch.to(device)
     input_map = {"rgb": rgb_batch, "depth": depth_batch}
     if (global_config.plot_enabled == 1):
-        dt.report_and_visualize(input_map, "FCity")
+        dt.visualize_results(input_map, "FCity")
+    dt.report_metrics("FCity")
 
     kitti_rgb_path = "X:/KITTI Depth Test/val_selection_cropped/image/*.png"
     kitti_depth_path = "X:/KITTI Depth Test/val_selection_cropped/groundtruth_depth/*.png"
@@ -160,7 +161,8 @@ def main(argv):
     depth_batch = depth_batch.to(device)
     input_map = {"rgb": rgb_batch, "depth": depth_batch}
     if (global_config.plot_enabled == 1):
-        dt.report_and_visualize(input_map, "KITTI")
+        dt.visualize_results(input_map, "KITTI")
+    dt.report_metrics("KITTI")
 
 
 

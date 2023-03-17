@@ -1,13 +1,17 @@
 import os
 
 def train_depth():
+    # os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
+    #          "--plot_enabled=1 --save_every_iter=20 --network_version=\"depth_v01.07\" "
+    #          "--iteration=10")
+
     os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
-             "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.04\" "
-             "--iteration=5")
+              "--plot_enabled=1 --save_every_iter=100 --network_version=\"depth_v01.06\" "
+              "--iteration=13")
 
 def test_depth():
-    os.system("python \"test_main.py\" --server_config=3 --img_to_load=-1 --network_version=\"depth_v01.04\" "
-              "--iteration=7")
+    os.system("python \"test_main.py\" --server_config=3 --img_to_load=-1 --plot_enabled=0 --network_version=\"depth_v01.03\" "
+              "--iteration=1")
 def main():
     train_depth()
     # test_depth()

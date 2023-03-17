@@ -48,8 +48,8 @@ class VisdomReporter:
             self.vis.images(img_group, win = self.image_windows[hash(caption)], opts = dict(caption = caption))
 
     def plot_text(self, text):
-        if(global_config.plot_enabled == 0):
-            return
+        # if(global_config.plot_enabled == 0):
+        #     return
 
         if(hash(text) not in self.text_windows):
             self.text_windows[hash(text)] = self.vis.text(text, opts = dict(caption = text))

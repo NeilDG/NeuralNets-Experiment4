@@ -1,5 +1,7 @@
+import kornia.metrics.psnr
+
 from config import network_config
-from config.network_config import NetworkConfig
+from config.network_config import ConfigHolder
 from trainers import abstract_iid_trainer
 import global_config
 import torch
@@ -27,18 +29,22 @@ class DepthTester():
         self.mse_results = []
         self.rmse_results = []
         self.rmse_log_results = []
+        self.psnr_results = []
 
     #measures the performance of a given batch and stores it
     def measure_and_store(self, input_map):
         rgb2target = self.dt.test(input_map)
         target_depth = input_map["depth"]
 
-        rgb2target = tensor_utils.normalize_to_01(rgb2target)
-        target_depth = tensor_utils.normalize_to_01(target_depth)
+        # rgb2target = tensor_utils.normalize_to_01(rgb2target)
+        # target_depth = tensor_utils.normalize_to_01(target_depth)
         depth_mask = torch.isfinite(target_depth) & (target_depth > 0.0)
 
         rgb2target = torch.masked_select(rgb2target, depth_mask)
         target_depth = torch.masked_select(target_depth, depth_mask)
+
+        psnr_result = kornia.metrics.psnr(rgb2target, target_depth, torch.max(target_depth).item())
+        self.psnr_results.append(psnr_result.item())
 
         l1_result = self.l1_loss(rgb2target, target_depth).cpu()
         self.l1_results.append(l1_result)
@@ -57,10 +63,15 @@ class DepthTester():
         print("Rmse log result: ", rmse_log_result)
         self.rmse_log_results.append(rmse_log_result)
 
-    def report_and_visualize(self, input_map, dataset_title):
-        version_name = network_config.NetworkConfig.getInstance().get_version_name()
-
+    def visualize_results(self, input_map, dataset_title):
+        version_name = network_config.ConfigHolder.getInstance().get_version_name()
         self.dt.visdom_visualize(input_map, "Test - " + version_name + " " + dataset_title)
+
+    def report_metrics(self, dataset_title):
+        version_name = network_config.ConfigHolder.getInstance().get_version_name()
+
+        psnr_mean = np.round(np.mean(self.psnr_results), 4)
+        self.psnr_results.clear()
 
         l1_mean = np.round(np.mean(self.l1_results), 4)
         self.l1_results.clear()
@@ -74,8 +85,10 @@ class DepthTester():
         rmse_log_mean = np.round(np.mean(self.rmse_log_results), 4)
         self.rmse_log_results.clear()
 
-        self.visdom_reporter.plot_text(dataset_title + " Results - " + version_name + "<br>"
-                                       + "Abs Rel: " + str(l1_mean) + "<br>"
+        last_epoch = global_config.general_config["current_epoch"]
+        self.visdom_reporter.plot_text(dataset_title + " Results - " + version_name + " Last epoch: " + str(last_epoch) + "<br>"
+                                       + "PSNR: " +str(psnr_mean) + "<br>" 
+                                       "Abs Rel: " + str(l1_mean) + "<br>"
                                         "Sqr Rel: " + str(mse_mean) + "<br>"
                                        "RMSE: " + str(rmse_mean) + "<br>"
                                        "RMSE log: " +str(rmse_log_mean) +"<br>")

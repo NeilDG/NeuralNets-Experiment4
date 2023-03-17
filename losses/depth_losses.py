@@ -56,3 +56,24 @@ class GradLoss(nn.Module):
         grad_real = imgrad_yx(real)
 
         return torch.sum(torch.mean(torch.abs(grad_real - grad_fake)))
+
+# From monodepth2 by godard
+class DepthSmoothnessLoss(nn.Module):
+    def __init__(self):
+        super(DepthSmoothnessLoss, self).__init__()
+
+    def forward(self, pred, target):
+        """Computes the smoothness loss for a disparity image
+            The color image is used for edge-aware smoothness
+            """
+        grad_disp_x = torch.abs(pred[:, :, :, :-1] - pred[:, :, :, 1:])
+        grad_disp_y = torch.abs(pred[:, :, :-1, :] - pred[:, :, 1:, :])
+
+        grad_img_x = torch.mean(torch.abs(target[:, :, :, :-1] - target[:, :, :, 1:]), 1, keepdim=True)
+        grad_img_y = torch.mean(torch.abs(target[:, :, :-1, :] - target[:, :, 1:, :]), 1, keepdim=True)
+
+        grad_disp_x *= torch.exp(-grad_img_x)
+        grad_disp_y *= torch.exp(-grad_img_y)
+
+        return grad_disp_x.mean() + grad_disp_y.mean()
+

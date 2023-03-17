@@ -26,7 +26,7 @@ def smooth(in_planes, out_planes):
 def predict(in_planes, out_planes):
     return nn.Sequential(
         nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=1, padding=1),
-        nn.Tanh(),
+        nn.Sigmoid(),
     )
 
 
