@@ -14,7 +14,7 @@ def imgrad(img):
     device = global_config.general_config["cuda_device"]
     img = torch.mean(img, 1, True)
     fx = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
-    conv1 = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1, bias=False)
+    conv1 = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1, bias=False).to(device)
     weight = torch.from_numpy(fx).float().unsqueeze(0).unsqueeze(0)
     if img.is_cuda:
         weight = weight.to(device)
@@ -22,7 +22,7 @@ def imgrad(img):
     grad_x = conv1(img)
 
     fy = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
-    conv2 = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1, bias=False)
+    conv2 = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1, bias=False).to(device)
     weight = torch.from_numpy(fy).float().unsqueeze(0).unsqueeze(0)
     if img.is_cuda:
         weight = weight.to(device)
@@ -32,7 +32,6 @@ def imgrad(img):
     #     grad = torch.sqrt(torch.pow(grad_x,2) + torch.pow(grad_y,2))
 
     return grad_y, grad_x
-
 
 def imgrad_yx(img):
     N, C, _, _ = img.size()
