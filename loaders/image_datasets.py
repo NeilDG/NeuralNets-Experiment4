@@ -18,8 +18,9 @@ import kornia.augmentation as K
 
 class GenericImageDataset(data.Dataset):
     def __init__(self, img_length, rgb_list, exr_list, segmentation_list, transform_config):
-        network_config = ConfigHolder.getInstance().get_network_config()
-        self.augment_mode = network_config["augment_key"]
+        config_holder = ConfigHolder.getInstance()
+        self.augment_mode = config_holder.get_network_attribute("augment_key", "none")
+        self.use_tanh = config_holder.get_network_attribute("use_tanh", False)
         self.img_length = img_length
         self.rgb_list = rgb_list
         self.exr_list = exr_list
@@ -29,31 +30,24 @@ class GenericImageDataset(data.Dataset):
         self.norm_op = transforms.Normalize((0.5, ), (0.5, ))
 
         if ("augmix" in self.augment_mode and self.transform_config == 1):
-            self.initial_rgb_op = transforms.Compose([
+            self.initial_op = transforms.Compose([
                 transforms.ToPILImage(),
                 transforms.Resize((256, 256)),
+                transforms.AugMix(),
                 transforms.RandomHorizontalFlip(0.5),
                 transforms.RandomVerticalFlip(0.5),
-                transforms.AugMix(),
                 transforms.ToTensor()])
-
+        else:
             self.initial_op = transforms.Compose([
                 transforms.ToPILImage(),
                 transforms.Resize((256, 256)),
                 transforms.RandomHorizontalFlip(0.5),
                 transforms.RandomVerticalFlip(0.5),
-                transforms.ToTensor()])
-        else:
-            self.initial_rgb_op = transforms.Compose([
-                transforms.ToPILImage(),
-                transforms.Resize((256, 256)),
                 transforms.ToTensor()
             ])
 
-            self.initial_op = self.initial_rgb_op
-
         if (self.transform_config == 1):
-            patch_size = network_config["patch_size"]
+            patch_size = config_holder.get_network_attribute("patch_size", 32)
             self.patch_size = (patch_size, patch_size)
         else:
             self.patch_size = (256, 256)
@@ -63,7 +57,7 @@ class GenericImageDataset(data.Dataset):
         state = torch.get_rng_state()
         rgb_img = cv2.imread(self.rgb_list[idx])
         rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2RGB)
-        rgb_img = self.initial_rgb_op(rgb_img)
+        rgb_img = self.initial_op(rgb_img)
 
         torch.set_rng_state(state)
         depth_img = cv2.imread(self.exr_list[idx], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
@@ -85,9 +79,10 @@ class GenericImageDataset(data.Dataset):
             depth_img = transforms.functional.crop(depth_img, i, j, h, w)
             segmentation_img = transforms.functional.crop(segmentation_img, i, j, h, w)
 
-        # rgb_img = self.norm_op(rgb_img)
-        # depth_img = self.norm_op(depth_img)
-        # segmentation_img = self.norm_op(segmentation_img)
+        if(self.use_tanh):
+            rgb_img = self.norm_op(rgb_img)
+            depth_img = self.norm_op(depth_img)
+            segmentation_img = self.norm_op(segmentation_img)
 
         return rgb_img, depth_img, segmentation_img
 

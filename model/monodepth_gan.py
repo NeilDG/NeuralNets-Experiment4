@@ -7,6 +7,9 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from torchvision.models.resnet import resnet101
 
+from config.network_config import ConfigHolder
+
+
 def agg_node(in_planes, out_planes):
     return nn.Sequential(
         nn.Conv2d(in_planes, in_planes, kernel_size=3, stride=1, padding=1),
@@ -24,9 +27,15 @@ def smooth(in_planes, out_planes):
 
 
 def predict(in_planes, out_planes):
+    if (ConfigHolder.getInstance().get_network_attribute("use_tanh", False)):
+        last_layer = nn.Tanh
+        print("Using tanh")
+    else:
+        last_layer = nn.Sigmoid
+
     return nn.Sequential(
         nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=1, padding=1),
-        nn.Sigmoid(),
+        last_layer()
     )
 
 
@@ -82,6 +91,7 @@ class I2D(nn.Module):
         # Depth prediction
         self.predict1 = smooth(512, 128)
         self.predict2 = predict(128, 1)
+
 
     def _upsample_add(self, x, y):
         '''Upsample and add two feature maps.

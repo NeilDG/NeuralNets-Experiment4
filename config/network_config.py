@@ -19,6 +19,13 @@ class ConfigHolder():
     def get_network_config(self):
         return self.yaml_config
 
+    def get_network_attribute(self, key, default):
+        if(key in self.yaml_config):
+            # print("Key ", key, " found. Returning ", self.yaml_config[key])
+            return self.yaml_config[key]
+        else:
+            return default
+
     def get_hyper_params(self):
         return self.hyperparam_config
 
