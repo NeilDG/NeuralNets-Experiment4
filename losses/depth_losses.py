@@ -12,6 +12,7 @@ import global_config
 
 def imgrad(img):
     device = global_config.general_config["cuda_device"]
+    print("Cuda device to use for depth loss: ", device)
     img = torch.mean(img, 1, True)
     fx = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
     conv1 = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1, bias=False).to(device)
