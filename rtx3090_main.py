@@ -7,16 +7,10 @@ def train_depth():
 
 def test_depth():
     os.system("python \"test_main.py\" --server_config=3 --img_to_load=-1 --plot_enabled=1 --network_version=\"depth_v01.07\" "
-              "--iteration=10")
-
-    os.system("python \"test_main.py\" --server_config=3 --img_to_load=-1 --plot_enabled=1 --network_version=\"depth_v01.07\" "
-              "--iteration=11")
-
-    os.system("python \"test_main.py\" --server_config=3 --img_to_load=-1 --plot_enabled=1 --network_version=\"depth_v01.07\" "
-              "--iteration=12")
+              "--iteration=9")
 def main():
-    train_depth()
-    # test_depth()
+    # train_depth()
+    test_depth()
     # os.system("shutdown /s /t 1")
 
 if __name__ == "__main__":
