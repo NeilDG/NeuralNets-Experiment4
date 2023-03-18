@@ -47,29 +47,24 @@ hyperparams:
     is_bce: 1
 
   8:
-    l1_weight: 10.0
-    adv_weight: 1.0
-    is_bce: 1
-
-  9:
     ssim_weight: 1.0
     l1_log_weight: 0.01
     adv_weight: 1.0
     is_bce: 0
 
-  10:
+  9:
     ssim_weight: 1.0
     adv_weight: 1.0
     is_bce: 0
 
-  11:
+  10:
     ssim_weight: 1.0
     adv_weight: 0.0
     disp_weight: 0.01
     grad_weight: 0.02
     is_bce: 0
 
-  12:
+  11:
     ssim_weight: 1.0
     adv_weight: 1.0
     disp_weight: 0.01

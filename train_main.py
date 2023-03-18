@@ -32,6 +32,7 @@ parser.add_option('--save_every_iter', type=int, default=400)
 def update_config(opts):
     global_config.server_config = opts.server_config
     global_config.plot_enabled = opts.plot_enabled
+    global_config.save_every_iter = opts.save_every_iter
     global_config.general_config["network_version"] = opts.network_version
     global_config.general_config["iteration"] = opts.iteration
     network_config = ConfigHolder.getInstance().get_network_config()
@@ -136,7 +137,7 @@ def main(argv):
             if(dt.is_stop_condition_met()):
                 break
 
-            if(iteration % opts.save_every_iter == 0):
+            if(iteration % global_config.save_every_iter == 0):
                 dt.save_states(epoch, iteration, True)
 
                 if(global_config.plot_enabled == 1):
