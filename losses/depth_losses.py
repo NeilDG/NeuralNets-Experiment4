@@ -2,17 +2,22 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+import global_config
+
+
 #
 # Commonly used losses for depth predictions
 # Taken from: https://github.com/haofengac/MonoDepth-FPN-PyTorch/blob/master/main_fpn.py
 
 def imgrad(img):
+    device = global_config.general_config["cuda_device"]
     img = torch.mean(img, 1, True)
     fx = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]])
     conv1 = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1, bias=False)
     weight = torch.from_numpy(fx).float().unsqueeze(0).unsqueeze(0)
     if img.is_cuda:
-        weight = weight.cuda()
+        weight = weight.to(device)
     conv1.weight = nn.Parameter(weight)
     grad_x = conv1(img)
 
@@ -20,7 +25,7 @@ def imgrad(img):
     conv2 = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1, bias=False)
     weight = torch.from_numpy(fy).float().unsqueeze(0).unsqueeze(0)
     if img.is_cuda:
-        weight = weight.cuda()
+        weight = weight.to(device)
     conv2.weight = nn.Parameter(weight)
     grad_y = conv2(img)
 
