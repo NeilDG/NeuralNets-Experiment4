@@ -16,7 +16,7 @@ def test_depth():
 def main():
     train_depth()
     # test_depth()
-    # os.system("shutdown /s /t 1")
+    os.system("shutdown /s /t 1")
 
 if __name__ == "__main__":
     main()

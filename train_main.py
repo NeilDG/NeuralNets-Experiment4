@@ -49,7 +49,7 @@ def update_config(opts):
 
     elif(global_config.server_config == 2): #RTX 2080Ti
         global_config.general_config["num_workers"] = 6
-
+        global_config.path = "C:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
 
     elif(global_config.server_config == 3):
