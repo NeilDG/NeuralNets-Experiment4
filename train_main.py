@@ -89,7 +89,7 @@ def main(argv):
     hyperparam_config = ConfigHolder.getInstance().get_hyper_params()
     network_iteration = global_config.general_config["iteration"]
     hyperparams_table = hyperparam_config["hyperparams"][network_iteration]
-    print("Network iteration:", str(network_iteration), " hyper parameters: ", hyperparams_table)
+    print("Network iteration:", str(network_iteration), ". Hyper parameters: ", hyperparams_table, " Learning rates: ", network_config["g_lr"], network_config["d_lr"])
 
     rgb_path = global_config.rgb_path
     exr_path = global_config.exr_path

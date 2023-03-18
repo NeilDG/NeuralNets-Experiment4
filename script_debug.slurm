@@ -10,7 +10,7 @@
 NETWORK_VERSION=$1
 ITERATION=$2
 echo "CUDA_DEVICE=/dev/nvidia/$CUDA_VISIBLE_DEVICES"
-echo "Set network to"$NETWORK_VERSION " Set iteration to "$ITERATION
+echo "Set network to "$NETWORK_VERSION " Set iteration to "$ITERATION
 nvidia-smi
 
 # prepare working environment
