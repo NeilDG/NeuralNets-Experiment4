@@ -3,7 +3,7 @@ import GPUtil
 
 def main():
     GPUtil.showUtilization()
-    device_id = GPUtil.getFirstAvailable(maxMemory=0.1, maxLoad=0.1, attempts=15, interval=3600, verbose=True)
+    device_id = GPUtil.getFirstAvailable(maxMemory=0.1, maxLoad=0.1, attempts=2500, interval=30, verbose=True)
     gpu_device = "cuda:" + str(device_id[0])
     print("Available GPU device found: ", gpu_device)
 
