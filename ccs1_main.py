@@ -49,7 +49,7 @@ def main():
     gpu_device = "cuda:" + str(device_id[0])
     print("Available GPU device found: ", gpu_device)
 
-    p = multiprocessing.Process(target=train_proper, name="train_proper")
+    p = multiprocessing.Process(target=train_proper, name="train_proper", args=(gpu_device,))
     p.start()
 
     time.sleep(execution_seconds) #causes p to execute code for X seconds. 3600 = 1 hour
