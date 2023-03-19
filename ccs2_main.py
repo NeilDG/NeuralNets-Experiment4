@@ -20,7 +20,7 @@ def main():
     p = multiprocessing.Process(target=train_proper, name="train_proper", args=(gpu_device,))
     p.start()
 
-    time.sleep(10)  # causes p to execute code for X seconds. 3600 = 1 hour
+    time.sleep(execution_seconds)  # causes p to execute code for X seconds. 3600 = 1 hour
 
     # terminate
     print("\n Process " + p.name + " has finished execution.")

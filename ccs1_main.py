@@ -41,7 +41,7 @@ def train_proper(gpu_device):
              "--plot_enabled=0 --network_version=\"depth_v01.01\" "
              "--iteration=11")
 def main():
-    EXECUTION_TIME_IN_HOURS = 48
+    EXECUTION_TIME_IN_HOURS = 12
     execution_seconds = 3600 * EXECUTION_TIME_IN_HOURS
 
     GPUtil.showUtilization()
@@ -52,7 +52,7 @@ def main():
     p = multiprocessing.Process(target=train_proper, name="train_proper")
     p.start()
 
-    time.sleep(10) #causes p to execute code for X seconds. 3600 = 1 hour
+    time.sleep(execution_seconds) #causes p to execute code for X seconds. 3600 = 1 hour
 
     #terminate
     print("\n Process " +p.name+ " has finished execution.")
