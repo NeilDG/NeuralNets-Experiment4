@@ -145,12 +145,12 @@ def main(argv):
                     dt.visdom_plot(iteration)
                     dt.visdom_visualize(input_map, "Train")
 
-                    rgb_batch, depth_batch, _ = test_data
-                    rgb_batch = rgb_batch.to(device)
-                    depth_batch = depth_batch.to(device)
-                    input_map = {"rgb": rgb_batch, "depth": depth_batch}
-
-                    dt.visdom_visualize(input_map, "Test")
+                    # rgb_batch, depth_batch, _ = test_data
+                    # rgb_batch = rgb_batch.to(device)
+                    # depth_batch = depth_batch.to(device)
+                    # input_map = {"rgb": rgb_batch, "depth": depth_batch}
+                    #
+                    # dt.visdom_visualize(input_map, "Test")
 
         if(dt.is_stop_condition_met()):
             break

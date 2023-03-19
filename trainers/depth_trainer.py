@@ -260,7 +260,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
                 self.losses_dict_s[self.D_OVERALL_LOSS_KEY].append(errD.item())
                 self.losses_dict_s[self.LIKENESS_LOSS_KEY].append(SM_l1_loss.item() + SM_l1_log_loss.item())
                 self.losses_dict_s[self.G_ADV_LOSS_KEY].append(SM_adv_loss.item())
-                self.losses_dict_s[self.RMSE_LOSS_KEY].append(SM_rmse_loss.item())
+                self.losses_dict_s[self.RMSE_LOSS_KEY].append(SM_rmse_loss.item() + SM_rmse_log_loss.item())
                 self.losses_dict_s[self.GRADIENT_LOSS_KEY].append(SM_grad_loss.item())
                 self.losses_dict_s[self.SMOOTH_LOSS_KEY].append(SM_smooth_loss.item())
                 self.losses_dict_s[self.SSIM_LOSS_KEY].append(SM_ssim_loss.item())
@@ -286,7 +286,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
                 self.losses_dict_t[self.TEST_LOSS_KEY].append(self.l1_loss(rgb2target_unseen, target_unseen).item())
 
     def test(self, input_map):
-        with torch.no_grad():
+        with torch.no_grad() and amp.autocast():
             self.G_depth.eval()
 
             input_rgb = input_map["rgb"]
