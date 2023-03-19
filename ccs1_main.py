@@ -10,11 +10,11 @@ def train_proper(gpu_device):
              "--iteration=1")
 
     os.system("python \"train_main.py\" --server_config=1 --img_to_load=-1 --cuda_device=" +gpu_device+ " "
-             "--plot_enabled=0 --network_version=\"depth_v01.01\" "
+             "--plot_enabled=0 --network_version=\"depth_v01.02\" "
              "--iteration=2")
 
     os.system("python \"train_main.py\" --server_config=1 --img_to_load=-1 --cuda_device=" +gpu_device+ " "
-             "--plot_enabled=0 --network_version=\"depth_v01.01\" "
+             "--plot_enabled=0 --network_version=\"depth_v01.02\" "
              "--iteration=3")
 
     os.system("python \"train_main.py\" --server_config=1 --img_to_load=-1 --cuda_device=" +gpu_device+ " "
@@ -22,11 +22,11 @@ def train_proper(gpu_device):
              "--iteration=4")
 
     os.system("python \"train_main.py\" --server_config=1 --img_to_load=-1 --cuda_device=" +gpu_device+ " "
-             "--plot_enabled=0 --network_version=\"depth_v01.01\" "
+             "--plot_enabled=0 --network_version=\"depth_v01.02\" "
              "--iteration=5")
 
     os.system("python \"train_main.py\" --server_config=1 --img_to_load=-1 --cuda_device=" +gpu_device+ " "
-             "--plot_enabled=0 --network_version=\"depth_v01.01\" "
+             "--plot_enabled=0 --network_version=\"depth_v01.02\" "
              "--iteration=6")
 
     os.system("python \"train_main.py\" --server_config=1 --img_to_load=-1 --cuda_device=" +gpu_device+ " "
@@ -34,11 +34,11 @@ def train_proper(gpu_device):
              "--iteration=7")
 
     os.system("python \"train_main.py\" --server_config=1 --img_to_load=-1 --cuda_device=" +gpu_device+ " "
-             "--plot_enabled=0 --network_version=\"depth_v01.01\" "
+             "--plot_enabled=0 --network_version=\"depth_v01.02\" "
              "--iteration=10")
 
     os.system("python \"train_main.py\" --server_config=1 --img_to_load=-1 --cuda_device=" +gpu_device+ " "
-             "--plot_enabled=0 --network_version=\"depth_v01.01\" "
+             "--plot_enabled=0 --network_version=\"depth_v01.02\" "
              "--iteration=11")
 def main():
     EXECUTION_TIME_IN_HOURS = 12
