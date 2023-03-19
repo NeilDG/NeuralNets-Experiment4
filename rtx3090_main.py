@@ -1,4 +1,7 @@
 import os
+import multiprocessing
+import time
+
 
 def train_depth():
     # os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
@@ -30,9 +33,9 @@ def train_depth():
     #           "--iteration=7")\
 
     #FOR TESTING
-    # os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
-    #           "--plot_enabled=1 --save_every_iter=500 --network_version=\"depth_v01.10\" "
-    #           "--iteration=15")
+    os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
+              "--plot_enabled=1 --save_every_iter=500 --network_version=\"depth_v01.10\" "
+              "--iteration=15")
 
 def test_depth():
     os.system("python \"test_main.py\" --server_config=3 --img_to_load=-1 --plot_enabled=1 --network_version=\"depth_v01.07\" "
