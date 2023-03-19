@@ -55,7 +55,11 @@ def main():
     time.sleep(execution_seconds) #causes p to execute code for X seconds. 3600 = 1 hour
 
     #terminate
+    print("--------------------------------------------------")
+    print("--------------------------------------------------")
     print("\n Process " +p.name+ " has finished execution.")
+    print("--------------------------------------------------")
+    print("--------------------------------------------------")
     p.terminate()
     p.join()
 
