@@ -4,6 +4,7 @@ Created on Thu Jun 25 17:02:01 2020
 
 @author: delgallegon
 """
+import torch
 from matplotlib.lines import Line2D
 
 import global_config
@@ -47,9 +48,29 @@ class VisdomReporter:
         else:
             self.vis.images(img_group, win = self.image_windows[hash(caption)], opts = dict(caption = caption))
 
-    def plot_text(self, text):
+
+    def plot_heatmap(self, img_tensor, caption, normalize = True):
         if(global_config.plot_enabled == 0):
             return
+
+        img_group = vutils.make_grid(img_tensor[:16], nrow = 8, padding=2, normalize=normalize).cpu()
+        print("Img group size: ", np.shape(img_group))
+        plt.figure(figsize=(16, 4))
+        plt.imshow(img_group[0], cmap="magma", interpolation="nearest")
+        plt.tight_layout()
+        plt.axis('off')
+
+
+        if hash(caption) not in self.image_windows:
+            self.image_windows[hash(caption)] = self.vis.matplot(plt, opts = dict(caption = caption))
+        else:
+            self.vis.matplot(plt, win = self.image_windows[hash(caption)], opts = dict(caption = caption))
+
+        plt.show()
+
+    def plot_text(self, text):
+        # if(global_config.plot_enabled == 0):
+        #     return
 
         if(hash(text) not in self.text_windows):
             self.text_windows[hash(text)] = self.vis.text(text, opts = dict(caption = text))

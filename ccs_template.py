@@ -1,14 +1,19 @@
-import multiprocessing
-import os
-import time
+#######################################
+# Template script for finding an available GPU, and setting a time limit for GPU-time execution
+# Script by: Neil Del Gallego
+# DISCLAIMER: Script was only tested for Python commandline/terminal. Using this on notebook may not guarantee the same behavior.
+# The script is also still in its early stages.
+#######################################
 
+import multiprocessing
+import time
 import GPUtil
 
 def train_proper(gpu_device):
-    os.system("python \"train_main.py\" --server_config=1 --img_to_load=-1 --cuda_device=" +gpu_device+ " "
-             "--plot_enabled=0 --network_version=\"depth_v01.01\" "
-             "--iteration=4")
+    print("Your training routine here. It will be executed on " +gpu_device)
+
 def main():
+    #modify your script execution time here
     EXECUTION_TIME_IN_HOURS = 48
     execution_seconds = 3600 * EXECUTION_TIME_IN_HOURS
 

@@ -9,10 +9,11 @@ load_size: [8, 16, 4, 12] #amount of images to load in GPU. load_size <= batch_s
 num_blocks: 6
 weight_decay: 0.0
 dropout_rate: 0.0
-augment_key: "augmix"
+use_tanh: True
+augment_key: "none"
 
-g_lr: 0.00002
-d_lr: 0.00002
+g_lr: 0.0002
+d_lr: 0.0002
 min_epochs: 15
 max_epochs: 20
 

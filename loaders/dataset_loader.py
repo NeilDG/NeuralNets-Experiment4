@@ -3,12 +3,12 @@ import random
 import torch
 
 import global_config
-from config.network_config import NetworkConfig
+from config.network_config import ConfigHolder
 from loaders import image_datasets
 from torch.utils import data
 
 def load_train_dataset(rgb_path, exr_path, segmentation_path):
-    network_config = NetworkConfig.getInstance().get_network_config()
+    network_config = ConfigHolder.getInstance().get_network_config()
     general_config = global_config.general_config
     server_config = global_config.server_config
     exr_list = glob.glob(exr_path)

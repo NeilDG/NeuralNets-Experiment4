@@ -1,4 +1,6 @@
-from config.network_config import NetworkConfig
+import kornia.losses
+
+from config.network_config import ConfigHolder
 from losses import depth_losses
 from trainers import abstract_iid_trainer
 import global_config
@@ -18,22 +20,27 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.initialize_train_config()
 
     def initialize_train_config(self):
-        network_config = NetworkConfig.getInstance().get_network_config()
-        hyper_params = NetworkConfig.getInstance().get_hyper_params()
+        config_holder  = ConfigHolder.getInstance()
+        network_config = config_holder.get_network_config()
+        # hyper_params = ConfigHolder.getInstance().get_hyper_params()
         general_config = global_config.general_config
         server_config = global_config.server_config
 
         self.iteration = general_config["iteration"]
-        self.hyperparams_table = hyper_params["hyperparams"][self.iteration]
-        self.use_bce = self.hyperparams_table["is_bce"]
-        self.adv_weight = self.hyperparams_table["adv_weight"]
+        # self.hyperparams_table = hyper_params["hyperparams"][self.iteration]
+        # self.use_bce = self.hyperparams_table["is_bce"]
+        # self.adv_weight = self.hyperparams_table["adv_weight"]
+        self.use_bce = config_holder.get_hyper_params_weight(self.iteration, "is_bce")
+        self.adv_weight = config_holder.get_hyper_params_weight(self.iteration, "adv_weight")
 
         self.lpips_loss = lpips.LPIPS(net='vgg').to(self.gpu_device)
         self.l1_loss = nn.L1Loss()
         self.mse_loss = nn.MSELoss()
         self.bce_loss = nn.BCEWithLogitsLoss()
+        self.depth_smooth_loss = depth_losses.DepthSmoothnessLoss()
         self.gradient_loss = depth_losses.GradLoss()
         self.rmse_loss = depth_losses.RMSEDepthLoss()
+        self.ssim_loss = kornia.losses.SSIMLoss(5)
 
         self.D_SM_pool = image_pool.ImagePool(50)
 
@@ -55,7 +62,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.schedulerG = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizerG, patience=1000000 / self.batch_size, threshold=0.00005)
         self.schedulerD = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizerD, patience=1000000 / self.batch_size, threshold=0.00005)
 
-        self.NETWORK_VERSION = NetworkConfig.getInstance().get_version_name()
+        self.NETWORK_VERSION = ConfigHolder.getInstance().get_version_name()
         self.NETWORK_CHECKPATH = 'checkpoint/' + self.NETWORK_VERSION + '.pt'
         self.load_saved_state()
 
@@ -65,36 +72,74 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         else:
             return self.bce_loss(pred, target)
 
-    def l1_depth_log_loss(self, pred, target):
-        loss = torch.mean(torch.abs(torch.log(pred) - torch.log(target)))
-        return loss
+    def compute_l1_loss(self, pred, target):
+        config_holder = ConfigHolder.getInstance()
+        weight = config_holder.get_hyper_params_weight(self.iteration, "l1_weight")
+        if (weight > 0.0):
+            return self.l1_loss(pred, target) * weight
+        else:
+            return torch.zeros_like(self.l1_loss(pred, target))
+
+    def compute_l1_log_loss(self, pred, target):
+        config_holder = ConfigHolder.getInstance()
+        weight = config_holder.get_hyper_params_weight(self.iteration, "l1_log_weight")
+        if(weight > 0.0):
+            return self.l1_loss(torch.log(pred), torch.log(target)) * weight
+        else:
+            return torch.zeros_like(self.l1_loss(pred, target))
+
+    def compute_mse_loss(self, pred, target):
+        config_holder = ConfigHolder.getInstance()
+        weight = config_holder.get_hyper_params_weight(self.iteration, "mse_weight")
+        if (weight > 0.0):
+            return self.mse_loss(pred, target) * weight
+        else:
+            return torch.zeros_like(self.l1_loss(pred, target))
+
+    def compute_rmse_loss(self, pred, target):
+        config_holder = ConfigHolder.getInstance()
+        weight = config_holder.get_hyper_params_weight(self.iteration, "rmse_weight")
+        if (weight > 0.0):
+            return self.rmse_loss(pred, target) * weight
+        else:
+            return torch.zeros_like(self.l1_loss(pred, target))
+
+    def compute_rmse_log_loss(self, pred, target):
+        config_holder = ConfigHolder.getInstance()
+        weight = config_holder.get_hyper_params_weight(self.iteration, "rmse_log_weight")
+        if (weight > 0.0):
+            return self.rmse_loss(torch.log(pred), torch.log(target)) * weight
+        else:
+            return torch.zeros_like(self.l1_loss(pred, target))
+
+    def compute_depth_smoothness_loss(self, pred, target):
+        config_holder = ConfigHolder.getInstance()
+        weight = config_holder.get_hyper_params_weight(self.iteration, "disp_weight")
+        if (weight > 0.0):
+            return self.depth_smooth_loss(pred, target) * weight
+        else:
+            return torch.zeros_like(self.l1_loss(pred, target))
+
+    def compute_grad_loss(self, pred, target):
+        config_holder = ConfigHolder.getInstance()
+        weight = config_holder.get_hyper_params_weight(self.iteration, "grad_weight")
+        if (weight > 0.0):
+            return self.gradient_loss(pred, target) * weight
+        else:
+            return torch.zeros_like(self.l1_loss(pred, target))
+
+    def compute_ssim_loss(self, pred, target):
+        config_holder = ConfigHolder.getInstance()
+        weight = config_holder.get_hyper_params_weight(self.iteration, "ssim_weight")
+        if (weight > 0.0):
+            return self.ssim_loss(pred, target) * weight
+        else:
+            return torch.zeros_like(self.l1_loss(pred, target))
 
     def lpip_loss(self, pred, target):
         result = torch.squeeze(self.lpips_loss(pred, target))
         result = torch.mean(result)
         return result
-
-    def ssim_loss(self, pred, target):
-        pred_normalized = (pred * 0.5) + 0.5
-        target_normalized = (target * 0.5) + 0.5
-
-        return self.ssim_loss(pred_normalized, target_normalized)
-
-    #From monodepth2 by godard
-    def get_smooth_loss(self, pred, target):
-        """Computes the smoothness loss for a disparity image
-        The color image is used for edge-aware smoothness
-        """
-        grad_disp_x = torch.abs(pred[:, :, :, :-1] - pred[:, :, :, 1:])
-        grad_disp_y = torch.abs(pred[:, :, :-1, :] - pred[:, :, 1:, :])
-
-        grad_img_x = torch.mean(torch.abs(target[:, :, :, :-1] - target[:, :, :, 1:]), 1, keepdim=True)
-        grad_img_y = torch.mean(torch.abs(target[:, :, :-1, :] - target[:, :, 1:, :]), 1, keepdim=True)
-
-        grad_disp_x *= torch.exp(-grad_img_x)
-        grad_disp_y *= torch.exp(-grad_img_y)
-
-        return grad_disp_x.mean() + grad_disp_y.mean()
 
     def initialize_dict(self):
 
@@ -108,13 +153,13 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.GRADIENT_LOSS_KEY = "grad_loss"
         self.SMOOTH_LOSS_KEY = "smooth_loss"
         self.SSI_LOSS_KEY = "ssi_loss"
+        self.SSIM_LOSS_KEY = "ssim_loss"
 
         self.D_OVERALL_LOSS_KEY = "d_loss"
         self.D_A_REAL_LOSS_KEY = "d_real_a"
         self.D_A_FAKE_LOSS_KEY = "d_fake_a"
         self.D_B_REAL_LOSS_KEY = "d_real_b"
         self.D_B_FAKE_LOSS_KEY = "d_fake_b"
-
 
         # what to store in visdom?
         self.losses_dict_s = {}
@@ -126,6 +171,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.losses_dict_s[self.GRADIENT_LOSS_KEY] = []
         self.losses_dict_s[self.SMOOTH_LOSS_KEY] = []
         self.losses_dict_s[self.SSI_LOSS_KEY] = []
+        self.losses_dict_s[self.SSIM_LOSS_KEY] = []
         self.losses_dict_s[self.D_A_FAKE_LOSS_KEY] = []
         self.losses_dict_s[self.D_A_REAL_LOSS_KEY] = []
 
@@ -138,6 +184,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.caption_dict_s[self.GRADIENT_LOSS_KEY] = "Gradient loss per iteration"
         self.caption_dict_s[self.SMOOTH_LOSS_KEY] = "Smooth loss per iteration"
         self.caption_dict_s[self.SSI_LOSS_KEY] = "Scale-invariant loss per iteration"
+        self.caption_dict_s[self.SSIM_LOSS_KEY] = "SSIM loss per iteration"
         self.caption_dict_s[self.D_A_FAKE_LOSS_KEY] = "D fake loss per iteration"
         self.caption_dict_s[self.D_A_REAL_LOSS_KEY] = "D real loss per iteration"
 
@@ -154,6 +201,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.caption_dict_t[self.TEST_LOSS_KEY] = "Test L1 loss per iteration"
 
     def train(self, epoch, iteration, input_map, target_map):
+        config_holder = ConfigHolder.getInstance()
         input_rgb = input_map["rgb"]
         target_tensor = target_map["depth"]
 
@@ -179,21 +227,26 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
                 self.schedulerD.step(errD)
                 self.fp16_scaler.step(self.optimizerD)
 
+
             # shadow map generator
             self.optimizerG.zero_grad()
             self.G_depth.train()
             rgb2target = self.G_depth(input_rgb)
-            SM_l1_loss = self.l1_loss(rgb2target, target_tensor) * self.hyperparams_table["l1_weight"]
-            SM_smooth_loss = self.get_smooth_loss(rgb2target, target_tensor) * self.hyperparams_table["disp_weight"]
-            SM_grad_loss = self.gradient_loss(rgb2target, target_tensor) * self.hyperparams_table["grad_weight"]
-            SM_rmse_loss = self.rmse_loss(rgb2target, target_tensor) * self.hyperparams_table["rmse_weight"]
-            # SM_rmse_log_loss = self.rmse_loss(torch.log(rgb2target), torch.log(target_tensor)) * self.hyperparams_table["rmse_log_weight"]
+            SM_l1_loss = self.compute_l1_loss(rgb2target, target_tensor)
+            SM_l1_log_loss = self.compute_l1_log_loss(rgb2target, target_tensor)
+            SM_smooth_loss = self.compute_depth_smoothness_loss(rgb2target, target_tensor)
+            SM_grad_loss = self.compute_grad_loss(rgb2target, target_tensor)
+            SM_rmse_loss = self.compute_rmse_loss(rgb2target, target_tensor)
+            SM_rmse_log_loss = self.compute_rmse_log_loss(rgb2target, target_tensor)
+            SM_ssim_loss = self.compute_ssim_loss(rgb2target, target_tensor)
 
             prediction = self.D_depth(rgb2target)
             real_tensor = torch.ones_like(prediction)
             SM_adv_loss = self.adversarial_loss(prediction, real_tensor) * self.adv_weight
 
-            errG = SM_l1_loss + SM_smooth_loss + SM_grad_loss + SM_rmse_loss + SM_adv_loss
+            # print("Ranges: ", torch.min(rgb2target).item(), torch.max(rgb2target).item(),
+            #       torch.min(target_tensor).item(), torch.max(target_tensor).item(), " SM l1 total loss: ", (SM_l1_loss.item() + SM_l1_log_loss.item()))
+            errG = SM_l1_loss + SM_l1_log_loss + SM_smooth_loss + SM_grad_loss + SM_rmse_loss + SM_rmse_log_loss + SM_ssim_loss + SM_adv_loss
 
             self.fp16_scaler.scale(errG).backward()
             if (accum_batch_size % self.batch_size == 0):
@@ -202,14 +255,15 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
                 self.fp16_scaler.update()
 
             # what to put to losses dict for visdom reporting?
-            if (iteration > 50):
+            if (iteration > global_config.save_every_iter):
                 self.losses_dict_s[self.G_LOSS_KEY].append(errG.item())
                 self.losses_dict_s[self.D_OVERALL_LOSS_KEY].append(errD.item())
-                self.losses_dict_s[self.LIKENESS_LOSS_KEY].append(SM_l1_loss.item())
+                self.losses_dict_s[self.LIKENESS_LOSS_KEY].append(SM_l1_loss.item() + SM_l1_log_loss.item())
                 self.losses_dict_s[self.G_ADV_LOSS_KEY].append(SM_adv_loss.item())
-                self.losses_dict_s[self.RMSE_LOSS_KEY].append(SM_rmse_loss.item())
+                self.losses_dict_s[self.RMSE_LOSS_KEY].append(SM_rmse_loss.item() + SM_rmse_log_loss.item())
                 self.losses_dict_s[self.GRADIENT_LOSS_KEY].append(SM_grad_loss.item())
                 self.losses_dict_s[self.SMOOTH_LOSS_KEY].append(SM_smooth_loss.item())
+                self.losses_dict_s[self.SSIM_LOSS_KEY].append(SM_ssim_loss.item())
                 self.losses_dict_s[self.D_A_FAKE_LOSS_KEY].append(D_SM_fake_loss.item())
                 self.losses_dict_s[self.D_A_REAL_LOSS_KEY].append(D_SM_real_loss.item())
 
@@ -232,7 +286,7 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
                 self.losses_dict_t[self.TEST_LOSS_KEY].append(self.l1_loss(rgb2target_unseen, target_unseen).item())
 
     def test(self, input_map):
-        with torch.no_grad():
+        with torch.no_grad() and amp.autocast():
             self.G_depth.eval()
 
             input_rgb = input_map["rgb"]
@@ -256,13 +310,13 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
     def visdom_visualize(self, input_map, label="Train"):
         input_rgb = input_map["rgb"]
         rgb2target = self.test(input_map)
-        rgb2target = tensor_utils.normalize_to_01(rgb2target)
+        # rgb2target = tensor_utils.normalize_to_01(rgb2target)
 
         self.visdom_reporter.plot_image(input_rgb, str(label) + " RGB Images - " + self.NETWORK_VERSION + str(self.iteration))
-        self.visdom_reporter.plot_image(rgb2target, str(label) + " Depth-Like images - " + self.NETWORK_VERSION + str(self.iteration))
+        self.visdom_reporter.plot_heatmap(rgb2target, str(label) + " Depth-Like images - " + self.NETWORK_VERSION + str(self.iteration))
         if("depth" in input_map):
             target_tensor = input_map["depth"]
-            self.visdom_reporter.plot_image(target_tensor, str(label) + " Depth images - " + self.NETWORK_VERSION + str(self.iteration))
+            self.visdom_reporter.plot_heatmap(target_tensor, str(label) + " Depth images - " + self.NETWORK_VERSION + str(self.iteration))
 
     def save_states(self, epoch, iteration, is_temp:bool):
         save_dict = {'epoch': epoch, 'iteration': iteration, global_config.LAST_METRIC_KEY: self.stopper_method.get_last_metric()}

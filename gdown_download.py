@@ -11,6 +11,10 @@ def main(argv):
 
     if(opts.server_config == 0):
         output_dir = "/scratch1/scratch2/neil.delgallego/SynthV3_Raw/"
+    elif(opts.server_config == 4):
+        output_dir = "D:/Datasets/SynthV3_Raw/"
+    elif(opts.server_config == 7):
+        output_dir = "/home/neildelgallego/SynthV3_Raw/"
     else:
         output_dir = "/home/jupyter-neil.delgallego/SynthV3_Raw/"
 

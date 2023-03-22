@@ -3,9 +3,6 @@
 hyperparams:
   1:
     l1_weight: 2.0
-    l1_log_weight: 0.0
-    rmse_weight: 0.0
-    rmse_log_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01
     grad_weight: 1.0
@@ -13,9 +10,6 @@ hyperparams:
 
   2:
     l1_weight: 2.0
-    l1_log_weight: 0.0
-    rmse_weight: 0.0
-    rmse_log_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01
     grad_weight: 1.0
@@ -23,9 +17,6 @@ hyperparams:
 
   3:
     l1_weight: 1.0
-    l1_log_weight: 0.0
-    rmse_weight: 0.0
-    rmse_log_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01
     grad_weight: 1.0
@@ -33,52 +24,79 @@ hyperparams:
 
   4:
     l1_weight: 1.0
-    l1_log_weight: 0.0
-    rmse_weight: 0.0
-    rmse_log_weight: 0.0
     adv_weight: 1.0
     disp_weight: 0.01
     grad_weight: 1.0
     is_bce: 1
 
   5:
-    l1_weight: 0.0
-    l1_log_weight: 0.0
     rmse_weight: 1.0
-    rmse_log_weight: 0.0
     adv_weight: 1.0
-    disp_weight: 0.0
     grad_weight: 1.0
     is_bce: 0
 
   6:
-    l1_weight: 0.0
-    l1_log_weight: 0.0
     rmse_weight: 1.0
-    rmse_log_weight: 0.0
     adv_weight: 1.0
-    disp_weight: 0.0
     grad_weight: 1.0
     is_bce: 1
 
   7:
     l1_weight: 10.0
-    l1_log_weight: 0.0
-    rmse_weight: 0.0
-    rmse_log_weight: 0.0
     adv_weight: 1.0
-    disp_weight: 0.0
-    grad_weight: 0.0
-    ssi_weight: 0.0
     is_bce: 1
 
-  8:
-    l1_weight: 10.0
-    l1_log_weight: 0.0
-    rmse_weight: 0.0
-    rmse_log_weight: 0.0
+  9:
+    ssim_weight: 1.0
     adv_weight: 1.0
-    disp_weight: 0.0
-    grad_weight: 0.0
-    ssi_weight: 0.0
-    is_bce: 1
+    is_bce: 0
+
+  10:
+    ssim_weight: 1.0
+    adv_weight: 0.0
+    disp_weight: 0.01
+    grad_weight: 0.02
+    is_bce: 0
+
+  11:
+    ssim_weight: 1.0
+    adv_weight: 1.0
+    disp_weight: 0.01
+    grad_weight: 0.02
+    is_bce: 0
+
+  12:
+    l1_log_weight: 1.0
+    adv_weight: 1.0
+
+  13:
+    l1_log_weight: 10.0
+    adv_weight: 1.0
+
+  14:
+    rmse_log_weight: 1.0
+    adv_weight: 1.0
+
+  15:
+    rmse_log_weight: 10.0
+    adv_weight: 1.0
+
+  16:
+    l1_log_weight: 1.0
+    disp_weight: 0.01
+    adv_weight: 1.0
+
+  17:
+    l1_log_weight: 10.0
+    disp_weight: 0.01
+    adv_weight: 1.0
+
+  18:
+    rmse_log_weight: 1.0
+    disp_weight: 0.01
+    adv_weight: 1.0
+
+  19:
+    rmse_log_weight: 10.0
+    disp_weight: 0.01
+    adv_weight: 1.0

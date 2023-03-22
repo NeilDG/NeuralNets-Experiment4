@@ -10,6 +10,7 @@ LAST_METRIC_KEY = "last_metric"
 
 plot_enabled = 1
 disable_progress_bar = False
+save_every_iter = 500
 
 #Running on local = 0, Running on COARE = 1, Running on CCS server = 2
 server_config = 0

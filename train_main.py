@@ -9,7 +9,7 @@ import torchvision.utils as vutils
 import numpy as np
 import matplotlib.pyplot as plt
 
-from config.network_config import NetworkConfig
+from config.network_config import ConfigHolder
 from loaders import dataset_loader
 import global_config
 from utils import plot_utils
@@ -32,9 +32,11 @@ parser.add_option('--save_every_iter', type=int, default=400)
 def update_config(opts):
     global_config.server_config = opts.server_config
     global_config.plot_enabled = opts.plot_enabled
+    global_config.save_every_iter = opts.save_every_iter
+    global_config.general_config["cuda_device"] = opts.cuda_device
     global_config.general_config["network_version"] = opts.network_version
     global_config.general_config["iteration"] = opts.iteration
-    network_config = NetworkConfig.getInstance().get_network_config()
+    network_config = ConfigHolder.getInstance().get_network_config()
 
     if(global_config.server_config == 0): #COARE
         global_config.general_config["num_workers"] = 6
@@ -49,13 +51,28 @@ def update_config(opts):
 
     elif(global_config.server_config == 2): #RTX 2080Ti
         global_config.general_config["num_workers"] = 6
-
+        global_config.path = "C:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif(global_config.server_config == 3):
+    elif(global_config.server_config == 3): #RTX 3090 PC
         global_config.general_config["num_workers"] = 12
         global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using RTX 3090 configuration. Workers: ", global_config.general_config["num_workers"])
+
+    elif (global_config.server_config == 4): #RTX 2070 PC @RL208
+        global_config.general_config["num_workers"] = 4
+        global_config.path = "D:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
+        print("Using RTX 2070 @RL208 configuration. Workers: ", global_config.general_config["num_workers"])
+
+    elif (global_config.server_config == 5): #RTX 3060 PC Titan
+        global_config.general_config["num_workers"] = 12
+        global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
+        print("Using TITAN RTX 3060 configuration. Workers: ", global_config.general_config["num_workers"])
+
+    elif (global_config.server_config == 6):  # RTX 2080Ti @TITAN
+        global_config.general_config["num_workers"] = 12
+        global_config.path = "/home/neildelgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
+        print("Using TITAN RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
 
     global_config.path = global_config.path.format(dataset_version=network_config["dataset_version"])
     global_config.exr_path = global_config.path + "*.exr"
@@ -77,7 +94,7 @@ def main(argv):
     yaml_config = yaml_config.format(network_version=opts.network_version)
     hyperparam_path = "./hyperparam_tables/common_iter.yaml"
     with open(yaml_config) as f, open(hyperparam_path) as h:
-        NetworkConfig.initialize(yaml.load(f, SafeLoader), yaml.load(h, SafeLoader))
+        ConfigHolder.initialize(yaml.load(f, SafeLoader), yaml.load(h, SafeLoader))
 
     update_config(opts)
     print(opts)
@@ -85,11 +102,11 @@ def main(argv):
     print("Server config? %d Has GPU available? %d Count: %d" % (global_config.server_config, torch.cuda.is_available(), torch.cuda.device_count()))
     print("Torch CUDA version: %s" % torch.version.cuda)
 
-    network_config = NetworkConfig.getInstance().get_network_config()
-    hyperparam_config = NetworkConfig.getInstance().get_hyper_params()
+    network_config = ConfigHolder.getInstance().get_network_config()
+    hyperparam_config = ConfigHolder.getInstance().get_hyper_params()
     network_iteration = global_config.general_config["iteration"]
     hyperparams_table = hyperparam_config["hyperparams"][network_iteration]
-    print("Network iteration:", str(network_iteration), " hyper parameters: ", hyperparams_table)
+    print("Network iteration:", str(network_iteration), ". Hyper parameters: ", hyperparams_table, " Learning rates: ", network_config["g_lr"], network_config["d_lr"])
 
     rgb_path = global_config.rgb_path
     exr_path = global_config.exr_path
@@ -136,19 +153,19 @@ def main(argv):
             if(dt.is_stop_condition_met()):
                 break
 
-            if(iteration % opts.save_every_iter == 0):
+            if(iteration % global_config.save_every_iter == 0):
                 dt.save_states(epoch, iteration, True)
 
                 if(global_config.plot_enabled == 1):
                     dt.visdom_plot(iteration)
                     dt.visdom_visualize(input_map, "Train")
 
-                    rgb_batch, depth_batch, _ = test_data
-                    rgb_batch = rgb_batch.to(device)
-                    depth_batch = depth_batch.to(device)
-                    input_map = {"rgb": rgb_batch, "depth": depth_batch}
-
-                    dt.visdom_visualize(input_map, "Test")
+                    # rgb_batch, depth_batch, _ = test_data
+                    # rgb_batch = rgb_batch.to(device)
+                    # depth_batch = depth_batch.to(device)
+                    # input_map = {"rgb": rgb_batch, "depth": depth_batch}
+                    #
+                    # dt.visdom_visualize(input_map, "Test")
 
         if(dt.is_stop_condition_met()):
             break
