@@ -71,7 +71,7 @@ def update_config(opts):
 
     elif (global_config.server_config == 7):  # RTX 2080Ti @TITAN
         global_config.general_config["num_workers"] = 12
-        global_config.path = "/Documents/SynthV3_Raw/{dataset_version}/sequence.0/"
+        global_config.path = "/home/neildelgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using TITAN RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
 
     global_config.path = global_config.path.format(dataset_version=network_config["dataset_version"])
