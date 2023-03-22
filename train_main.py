@@ -69,6 +69,11 @@ def update_config(opts):
         global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using RTX 3090 configuration. Workers: ", global_config.general_config["num_workers"])
 
+    elif (global_config.server_config == 7):  # RTX 2080Ti @TITAN
+        global_config.general_config["num_workers"] = 12
+        global_config.path = "/Documents/SynthV3_Raw/{dataset_version}/sequence.0/"
+        print("Using TITAN RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
+
     global_config.path = global_config.path.format(dataset_version=network_config["dataset_version"])
     global_config.exr_path = global_config.path + "*.exr"
     global_config.rgb_path = global_config.path + "*.camera.png"

@@ -42,7 +42,7 @@ DATASET_NAME="v01_fcity"
 if [ $SERVER_CONFIG == 0 ]
 then
   OUTPUT_DIR="/scratch1/scratch2/neil.delgallego/SynthV3_Raw/"
-elif [ $SERVER_CONFIG == 4]
+elif [ $SERVER_CONFIG == 4 ]
 then
   OUTPUT_DIR="D:/Datasets/SynthV3_Raw/"
 else

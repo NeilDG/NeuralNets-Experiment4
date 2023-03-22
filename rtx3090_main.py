@@ -4,33 +4,9 @@ import time
 
 
 def train_depth():
-    # os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
-    #           "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.09\" "
-    #           "--iteration=1")
-    #
-    # os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
-    #           "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.09\" "
-    #           "--iteration=2")
-    #
-    # os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
-    #           "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.09\" "
-    #           "--iteration=3")
-    #
-    # os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
-    #           "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.09\" "
-    #           "--iteration=4")
-    #
-    # os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
-    #           "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.09\" "
-    #           "--iteration=5")
-    #
-    # os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
-    #           "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.09\" "
-    #           "--iteration=6")
-    #
-    # os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
-    #           "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.09\" "
-    #           "--iteration=7")
+    os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
+              "--plot_enabled=1 --save_every_iter=50 --network_version=\"depth_v01.09\" "
+              "--iteration=11")
 
     # FOR TESTING
     os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
