@@ -66,6 +66,11 @@ def main(argv):
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     print("Device: %s" % device)
 
+    manualSeed = 0
+    random.seed(manualSeed)
+    torch.manual_seed(manualSeed)
+    np.random.seed(manualSeed)
+
     (opts, args) = parser.parse_args(argv)
     yaml_config = "./hyperparam_tables/{network_version}.yaml"
     yaml_config = yaml_config.format(network_version=opts.network_version)

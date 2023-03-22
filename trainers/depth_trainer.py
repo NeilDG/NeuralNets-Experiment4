@@ -313,10 +313,10 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         # rgb2target = tensor_utils.normalize_to_01(rgb2target)
 
         self.visdom_reporter.plot_image(input_rgb, str(label) + " RGB Images - " + self.NETWORK_VERSION + str(self.iteration))
-        self.visdom_reporter.plot_image(rgb2target, str(label) + " Depth-Like images - " + self.NETWORK_VERSION + str(self.iteration))
+        self.visdom_reporter.plot_heatmap(rgb2target, str(label) + " Depth-Like images - " + self.NETWORK_VERSION + str(self.iteration))
         if("depth" in input_map):
             target_tensor = input_map["depth"]
-            self.visdom_reporter.plot_image(target_tensor, str(label) + " Depth images - " + self.NETWORK_VERSION + str(self.iteration))
+            self.visdom_reporter.plot_heatmap(target_tensor, str(label) + " Depth images - " + self.NETWORK_VERSION + str(self.iteration))
 
     def save_states(self, epoch, iteration, is_temp:bool):
         save_dict = {'epoch': epoch, 'iteration': iteration, global_config.LAST_METRIC_KEY: self.stopper_method.get_last_metric()}
