@@ -8,7 +8,7 @@ class LastLayerBlock(nn.Module):
         super(LastLayerBlock, self).__init__()
         if (ConfigHolder.getInstance().get_network_attribute("use_tanh", False)):
             self.last_layer = nn.Tanh()
-            print("Using tanh")
+            # print("Using tanh")
         else:
             self.last_layer = nn.Sigmoid()
 

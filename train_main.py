@@ -54,7 +54,17 @@ def update_config(opts):
         global_config.path = "C:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif(global_config.server_config == 3):
+    elif(global_config.server_config == 3): #RTX 3090 PC
+        global_config.general_config["num_workers"] = 12
+        global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
+        print("Using RTX 3090 configuration. Workers: ", global_config.general_config["num_workers"])
+
+    elif (global_config.server_config == 4): #RTX 2070 PC
+        global_config.general_config["num_workers"] = 12
+        global_config.path = "D:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
+        print("Using RTX 3090 configuration. Workers: ", global_config.general_config["num_workers"])
+
+    elif (global_config.server_config == 5): #RTX 3060 PC Titan
         global_config.general_config["num_workers"] = 12
         global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using RTX 3090 configuration. Workers: ", global_config.general_config["num_workers"])

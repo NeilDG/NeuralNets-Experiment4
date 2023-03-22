@@ -43,11 +43,13 @@ class NetworkCreator():
         elif(model_type == 5):
             G_A = monodepth_gan.I2D().to(self.gpu_device)
             self.constant_weight_init(G_A, 0.5)
-        else:
+        elif(model_type == 6):
             G_A = cycle_gan.SpectralGenerator(input_nc=network_config["input_nc"], output_nc=1, n_residual_blocks=network_config["num_blocks"],
                                               dropout_rate=network_config["dropout_rate"]).to(self.gpu_device)
 
             D_A = cycle_gan.SpectralDiscriminator(input_nc=1).to(self.gpu_device)
+        else:
+            G_A = ffa_gan.FFADepth(network_config["num_blocks"], dropout_rate=network_config["dropout_rate"]).to(self.gpu_device)
 
 
         return G_A, D_A

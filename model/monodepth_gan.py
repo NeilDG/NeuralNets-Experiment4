@@ -29,7 +29,7 @@ def smooth(in_planes, out_planes):
 def predict(in_planes, out_planes):
     if (ConfigHolder.getInstance().get_network_attribute("use_tanh", False)):
         last_layer = nn.Tanh
-        print("Using tanh")
+        # print("Using tanh")
     else:
         last_layer = nn.Sigmoid
 
