@@ -45,6 +45,9 @@ then
 elif [ $SERVER_CONFIG == 4 ]
 then
   OUTPUT_DIR="D:/Datasets/SynthV3_Raw/"
+elif [ $SERVER_CONFIG == 7 ]
+then
+  OUTPUT_DIR="/SynthV3_Raw/"
 else
   OUTPUT_DIR="/home/jupyter-neil.delgallego/SynthV3_Raw/"
 fi
