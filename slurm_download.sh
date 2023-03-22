@@ -10,7 +10,7 @@
 
 #About this script:
 #Download of dataset
-SERVER_CONFIG=0 #0 = COARE, 1 = CCS Cloud
+SERVER_CONFIG=4 #0 = COARE, 1 = CCS Cloud
 
 module load anaconda/3-2021.11
 module load cuda/10.1_cudnn-7.6.5
@@ -56,7 +56,7 @@ unzip "$OUTPUT_DIR/$DATASET_NAME+fixed.zip" -d "$OUTPUT_DIR"
 #mv "$OUTPUT_DIR/$DATASET_NAME+fixed" "$OUTPUT_DIR/$DATASET_NAME"
 #rm -rf "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
 
-if [ $SERVER_CONFIG == 1 ]
+if [ $SERVER_CONFIG == 4 ]
 then
-  python "ccs1_main.py"
+  python "rl208_main.py"
 fi
