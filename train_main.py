@@ -62,12 +62,12 @@ def update_config(opts):
     elif (global_config.server_config == 4): #RTX 2070 PC @RL208
         global_config.general_config["num_workers"] = 12
         global_config.path = "D:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
-        print("Using RTX 3090 configuration. Workers: ", global_config.general_config["num_workers"])
+        print("Using RTX 2070 @RL208 configuration. Workers: ", global_config.general_config["num_workers"])
 
     elif (global_config.server_config == 5): #RTX 3060 PC Titan
         global_config.general_config["num_workers"] = 12
         global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
-        print("Using RTX 3090 configuration. Workers: ", global_config.general_config["num_workers"])
+        print("Using TITAN RTX 3060 configuration. Workers: ", global_config.general_config["num_workers"])
 
     elif (global_config.server_config == 7):  # RTX 2080Ti @TITAN
         global_config.general_config["num_workers"] = 12
