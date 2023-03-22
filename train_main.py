@@ -69,7 +69,7 @@ def update_config(opts):
         global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using TITAN RTX 3060 configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif (global_config.server_config == 7):  # RTX 2080Ti @TITAN
+    elif (global_config.server_config == 6):  # RTX 2080Ti @TITAN
         global_config.general_config["num_workers"] = 12
         global_config.path = "/home/neildelgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using TITAN RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
