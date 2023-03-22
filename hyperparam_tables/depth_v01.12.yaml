@@ -2,9 +2,9 @@ model_type: 7
 input_nc: 3
 patch_size: 256
 
-#0 - COARE, 1 - CCS Cloud, 2 - 2080Ti, 3 - 3090
-batch_size: [8, 16, 4, 12, 4] #amount of images to accumulate before backprop
-load_size: [8, 16, 4, 12, 4] #amount of images to load in GPU. load_size <= batch_size
+#batch size for each workstation
+batch_size: [8, 16, 4, 12, 4, 12, 12] #amount of images to accumulate before backprop
+load_size: [8, 16, 4, 12, 4, 12, 12] #amount of images to load in GPU. load_size <= batch_size
 
 num_blocks: 6
 weight_decay: 0.0
