@@ -29,6 +29,7 @@ pip install lpips
 pip install gputil
 pip install matplotlib
 pip install --upgrade --no-cache-dir gdown
+pip install PyYAML
 
 if [ $SERVER_CONFIG == 0 ]
 then
