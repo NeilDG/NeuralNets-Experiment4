@@ -18,12 +18,20 @@ general_config = {
     "num_workers" : 12,
     "cuda_device" : "cuda:0",
     "network_version" : "VXX.XX",
+    "style_transfer_version" : "VXX.XX",
     "iteration" : 1,
     "current_epoch" : 0,
-    "test_size" : 16
+    "test_size" : 16,
 }
+
+batch_size = -1
+load_size = -1
+img_to_load = -1
 
 path = ""
 exr_path = ""
 rgb_path = ""
 segmentation_path = ""
+
+a_path = ""
+b_path = ""
