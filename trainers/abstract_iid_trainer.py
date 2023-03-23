@@ -54,6 +54,25 @@ class NetworkCreator():
 
         return G_A, D_A
 
+    def initialize_img2img_network(self):
+        network_config = ConfigHolder.getInstance().get_network_config()
+        model_type = network_config["model_type"]
+
+        D_A = cycle_gan.Discriminator(input_nc=3).to(self.gpu_device)  # use CycleGAN's discriminator
+
+        if (model_type == 1):
+            G_A = cycle_gan.Generator(input_nc=network_config["input_nc"], output_nc=3, n_residual_blocks=network_config["num_blocks"],
+                                      dropout_rate=network_config["dropout_rate"], use_cbam=network_config["use_cbam"]).to(self.gpu_device)
+        elif (model_type == 2):
+            G_A = unet_gan.UnetGenerator(input_nc=network_config["input_nc"], output_nc=3, num_downs=network_config["num_blocks"]).to(self.gpu_device)
+        else:
+            G_A = cycle_gan.SpectralGenerator(input_nc=network_config["input_nc"], output_nc=3, n_residual_blocks=network_config["num_blocks"],
+                                              dropout_rate=network_config["dropout_rate"]).to(self.gpu_device)
+
+            D_A = cycle_gan.SpectralDiscriminator(input_nc=3).to(self.gpu_device)
+
+        return G_A, D_A
+
 
 class AbstractIIDTrainer():
     def __init__(self, gpu_device):

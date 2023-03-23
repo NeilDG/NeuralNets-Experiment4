@@ -124,3 +124,43 @@ class KittiDepthDataset(data.Dataset):
 
     def __len__(self):
         return self.img_length
+
+class UnpairedImageDataset(data.Dataset):
+    def __init__(self, img_length, a_list, b_list, transform_config):
+        self.img_length = img_length
+        self.a_list = a_list
+        self.b_list = b_list
+        self.transform_config = transform_config
+
+        config_holder = ConfigHolder.getInstance()
+        self.augment_mode = config_holder.get_network_attribute("augment_key", "none")
+        self.use_tanh = config_holder.get_network_attribute("use_tanh", False)
+
+        if (self.transform_config == 1):
+            patch_size = config_holder.get_network_attribute("patch_size", 32)
+        else:
+            patch_size = 256
+
+        self.patch_size = (patch_size, patch_size)
+        self.initial_op = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((256, 256)),
+            transforms.RandomCrop(self.patch_size),
+            transforms.RandomHorizontalFlip(0.5),
+            transforms.RandomVerticalFlip(0.5),
+            transforms.ToTensor()
+        ])
+
+    def __getitem__(self, idx):
+        a_img = cv2.imread(self.a_list[idx])
+        a_img = cv2.cvtColor(a_img, cv2.COLOR_BGR2RGB)
+        a_img = self.initial_op(a_img)
+
+        b_img = cv2.imread(self.b_list[idx % len(self.a_list)])
+        b_img = cv2.cvtColor(b_img, cv2.COLOR_BGR2RGB)
+        b_img = self.initial_op(b_img)
+
+        return a_img, b_img
+
+    def __len__(self):
+        return self.img_length

@@ -21,9 +21,16 @@ def test_depth():
     os.system("python \"test_main.py\" --server_config=3 --img_to_load=-1 --plot_enabled=1 --network_version=\"depth_v01.02\" "
               "--iteration=11")
 
+def train_img2img():
+    os.system("python \"train_img2img_main.py\" --server_config=3 --img_to_load=1000 "
+              "--plot_enabled=1 --save_every_iter=50 --network_version=\"synth2real_v01.00\" "
+              "--iteration=1")
+
 def main():
     # train_depth()
-    test_depth()
+    # test_depth()
+
+    train_img2img()
     # os.system("shutdown /s /t 1")
 
 if __name__ == "__main__":
