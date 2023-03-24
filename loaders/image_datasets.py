@@ -133,9 +133,10 @@ class KittiDepthDataset(data.Dataset):
     def __len__(self):
         return self.img_length
 
-class SingleImageDataset(data.Dataset):
-    def __init__(self, a_list, transform_config):
+class PairedImageDataset(data.Dataset):
+    def __init__(self, a_list, b_list, transform_config):
         self.a_list = a_list
+        self.b_list = b_list
         self.transform_config = transform_config
 
         config_holder = ConfigHolder.getInstance()
@@ -161,10 +162,15 @@ class SingleImageDataset(data.Dataset):
         a_img = cv2.cvtColor(a_img, cv2.COLOR_BGR2RGB)
         a_img = self.initial_op(a_img)
 
+        b_img = cv2.imread(self.b_list[(idx % len(self.b_list))])
+        b_img = cv2.cvtColor(b_img, cv2.COLOR_BGR2RGB)
+        b_img = self.initial_op(b_img)
+
         if(self.use_tanh):
             a_img = self.norm_op(a_img)
+            b_img = self.norm_op(b_img)
 
-        return a_img
+        return a_img, b_img
 
     def __len__(self):
         return len(self.a_list)

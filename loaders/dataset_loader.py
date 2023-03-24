@@ -67,7 +67,6 @@ def load_train_img2img_dataset(a_path, b_path):
     a_list_dup = glob.glob(a_path)
     b_list_dup = glob.glob(b_path)
 
-    print("Img to load is? " ,global_config.img_to_load)
     if (global_config.img_to_load > 0):
         a_list = a_list[0: global_config.img_to_load]
         b_list = b_list[0: global_config.img_to_load]
@@ -86,26 +85,14 @@ def load_train_img2img_dataset(a_path, b_path):
     img_length = len(a_list)
     print("Length of images: %d %d"  % (img_length, len(b_list)))
 
-    num_workers = int(general_config["num_workers"] / 2)
-    data_loader_a = torch.utils.data.DataLoader(
-        image_datasets.SingleImageDataset(a_list, 1),
+    num_workers = general_config["num_workers"]
+    data_loader = torch.utils.data.DataLoader(
+        image_datasets.PairedImageDataset(a_list, b_list, 1),
         batch_size=global_config.load_size,
         num_workers=num_workers
-        # shuffle=False,
-        # pin_memory=True,
-        # pin_memory_device=global_config.general_config["cuda_device"]
     )
 
-    data_loader_b = torch.utils.data.DataLoader(
-        image_datasets.SingleImageDataset(b_list, 1),
-        batch_size=global_config.load_size,
-        num_workers=num_workers
-        # shuffle=False,
-        # pin_memory=True,
-        # pin_memory_device=global_config.general_config["cuda_device"]
-    )
-
-    return data_loader_a, data_loader_b, img_length
+    return data_loader, img_length
 
 def load_test_img2img_dataset(a_path, b_path):
     a_list = glob.glob(a_path)
@@ -121,21 +108,13 @@ def load_test_img2img_dataset(a_path, b_path):
     img_length = len(a_list)
     print("Length of images: %d %d" % (img_length, len(b_list)))
 
-    data_loader_a = torch.utils.data.DataLoader(
-        image_datasets.SingleImageDataset(a_list, 2),
-        batch_size=global_config.load_size,
-        num_workers=1,
-        shuffle=False,
+    data_loader = torch.utils.data.DataLoader(
+        image_datasets.PairedImageDataset(a_list, b_list, 1),
+        batch_size=global_config.general_config["test_size"],
+        num_workers=1
     )
 
-    data_loader_b = torch.utils.data.DataLoader(
-        image_datasets.SingleImageDataset(b_list, 2),
-        batch_size=global_config.load_size,
-        num_workers=1,
-        shuffle=False,
-    )
-
-    return data_loader_a, data_loader_b, img_length
+    return data_loader, img_length
 
 def load_kitti_test_dataset(rgb_path, depth_path):
     general_config = global_config.general_config

@@ -1,4 +1,4 @@
-model_type: 1
+model_type: 4
 input_nc: 3
 patch_size: 64
 
@@ -13,7 +13,7 @@ dropout_rate: 0.0
 augment_key: "none"
 use_tanh: True
 use_cbam: False
-norm_mode: "batch"
+norm_mode: "instance"
 
 g_lr: 0.0002
 d_lr: 0.0005
