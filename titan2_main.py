@@ -13,11 +13,11 @@ def test_depth():
               "--iteration=12")
 
 def train_img2img():
-    os.system("python \"train_img2img_main.py\" --server_config=6 --img_to_load=-1 "
+    os.system("python3 \"train_img2img_main.py\" --server_config=6 --img_to_load=-1 "
               "--plot_enabled=0 --save_every_iter=10 --network_version=\"synth2real_v01.01\" "
               "--iteration=1")
 
-    os.system("python \"train_img2img_main.py\" --server_config=6 --img_to_load=-1 "
+    os.system("python3 \"train_img2img_main.py\" --server_config=6 --img_to_load=-1 "
               "--plot_enabled=0 --save_every_iter=10 --network_version=\"synth2real_v01.01\" "
               "--iteration=2")
 
