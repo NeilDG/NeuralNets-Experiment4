@@ -37,8 +37,8 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.fp16_scaler = amp.GradScaler()
         self.visdom_reporter = plot_utils.VisdomReporter.getInstance()
 
-        self.load_size = network_config["load_size"][server_config]
-        self.batch_size = network_config["batch_size"][server_config]
+        self.load_size = global_config.load_size
+        self.batch_size = global_config.batch_size
 
         self.stopper_method = early_stopper.EarlyStopper(network_config["min_epochs"], early_stopper.EarlyStopperMethod.L1_TYPE, 1000)
         self.stop_result = False
