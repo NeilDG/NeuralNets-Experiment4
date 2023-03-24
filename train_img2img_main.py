@@ -77,8 +77,8 @@ def update_config(opts):
         global_config.general_config["num_workers"] = 12
         global_config.a_path = "/home/neildelgallego/Places Dataset/*.jpg"
         global_config.b_path = "/home/neildelgallego/SynthV3_Raw/{dataset_version}/sequence.0/*.camera.png"
-        global_config.batch_size = network_config["batch_size"][0]
-        global_config.load_size = network_config["load_size"][0]
+        global_config.batch_size = network_config["batch_size"][2]
+        global_config.load_size = network_config["load_size"][2]
         print("Using TITAN Workstation configuration. Workers: ", global_config.general_config["num_workers"])
 
     global_config.b_path = global_config.b_path.format(dataset_version=network_config["dataset_version"])
