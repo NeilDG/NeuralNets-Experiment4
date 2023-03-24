@@ -90,26 +90,24 @@ def load_train_img2img_dataset(a_path, b_path):
     data_loader_a = torch.utils.data.DataLoader(
         image_datasets.SingleImageDataset(a_list, 1),
         batch_size=global_config.load_size,
-        num_workers=num_workers,
-        shuffle=False,
-        pin_memory=True,
-        pin_memory_device=global_config.general_config["cuda_device"]
+        num_workers=num_workers
+        # shuffle=False,
+        # pin_memory=True,
+        # pin_memory_device=global_config.general_config["cuda_device"]
     )
 
     data_loader_b = torch.utils.data.DataLoader(
         image_datasets.SingleImageDataset(b_list, 1),
         batch_size=global_config.load_size,
-        num_workers=num_workers,
-        shuffle=False,
-        pin_memory=True,
-        pin_memory_device=global_config.general_config["cuda_device"]
+        num_workers=num_workers
+        # shuffle=False,
+        # pin_memory=True,
+        # pin_memory_device=global_config.general_config["cuda_device"]
     )
 
     return data_loader_a, data_loader_b, img_length
 
 def load_test_img2img_dataset(a_path, b_path):
-    general_config = global_config.general_config
-
     a_list = glob.glob(a_path)
     b_list = glob.glob(b_path)
 
@@ -128,8 +126,6 @@ def load_test_img2img_dataset(a_path, b_path):
         batch_size=global_config.load_size,
         num_workers=1,
         shuffle=False,
-        pin_memory=True,
-        pin_memory_device=general_config["cuda_device"]
     )
 
     data_loader_b = torch.utils.data.DataLoader(
@@ -137,8 +133,6 @@ def load_test_img2img_dataset(a_path, b_path):
         batch_size=global_config.load_size,
         num_workers=1,
         shuffle=False,
-        pin_memory=True,
-        pin_memory_device=general_config["cuda_device"]
     )
 
     return data_loader_a, data_loader_b, img_length

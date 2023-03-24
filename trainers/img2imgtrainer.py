@@ -14,6 +14,7 @@ import torch.nn as nn
 import numpy as np
 from trainers import early_stopper
 from losses import common_losses
+from loaders import transform_operations
 
 class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
     def __init__(self, gpu_device):
@@ -46,6 +47,9 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         network_creator = abstract_iid_trainer.NetworkCreator(self.gpu_device)
         self.G_A2B, self.D_B = network_creator.initialize_img2img_network()
         self.G_B2A, self.D_A = network_creator.initialize_img2img_network()
+
+        patch_size = config_holder.get_network_attribute("patch_size", 32)
+        self.transform_op = transform_operations.Img2ImgBasicTransform(patch_size).to(self.gpu_device)
 
         self.optimizerG = torch.optim.Adam(itertools.chain(self.G_A2B.parameters(), self.G_B2A.parameters()), lr=self.g_lr, weight_decay=network_config["weight_decay"])
         self.optimizerD = torch.optim.Adam(itertools.chain(self.D_A.parameters(), self.D_B.parameters()), lr=self.d_lr, weight_decay=network_config["weight_decay"])
@@ -129,6 +133,8 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
     def train(self, epoch, iteration, input_map, target_map):
         img_a = input_map["img_a"]
         img_b = input_map["img_b"]
+        img_a = self.transform_op(img_a)
+        img_b = self.transform_op(img_b)
 
         accum_batch_size = self.load_size * iteration
 
@@ -238,9 +244,12 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
     def visdom_visualize(self, input_map, label="Train"):
         with torch.no_grad():
             style_transfer_version = global_config.general_config["network_version"]
-
             img_a = input_map["img_a"]
             img_b = input_map["img_b"]
+            if(label == "Train"):
+                img_a = self.transform_op(img_a)
+                img_b = self.transform_op(img_b)
+
             img_a2b, img_b2a = self.test(input_map)
             img_a2b2a = self.G_B2A(self.G_A2B(img_a))
             img_b2a2b = self.G_A2B(self.G_B2A(img_b))
