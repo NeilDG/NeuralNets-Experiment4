@@ -29,24 +29,24 @@ class Img2ImgTester():
     #measures the performance of a given batch and stores it
     def measure_and_store(self, input_map):
         use_tanh = ConfigHolder.getInstance().get_network_attribute("use_tanh", False)
-        img_a2b, img_b2a = self.img2img_t.test(input_map)
+        img_a2b, img_b2a = self.img2img_t.test(input_map) #a2b --> real2synth, b2a --> synth2real
 
         target = input_map["img_a"]
 
         if(use_tanh):
-            rgb2target = tensor_utils.normalize_to_01(img_a2b)
+            img_b2a = tensor_utils.normalize_to_01(img_b2a)
             target = tensor_utils.normalize_to_01(target)
 
-        psnr_result = kornia.metrics.psnr(img_a2b, target, torch.max(target).item())
+        psnr_result = kornia.metrics.psnr(img_b2a, target, torch.max(target).item())
         self.psnr_results.append(psnr_result.item())
 
-        l1_result = self.l1_loss(img_a2b, target).cpu()
+        l1_result = self.l1_loss(img_b2a, target).cpu()
         self.l1_results.append(l1_result)
 
-        mse_result = self.mse_loss(img_a2b, target).cpu()
+        mse_result = self.mse_loss(img_b2a, target).cpu()
         self.mse_results.append(mse_result)
 
-        rmse_result = depth_metrics.torch_rmse(img_a2b, target).item()
+        rmse_result = depth_metrics.torch_rmse(img_b2a, target).item()
         self.rmse_results.append(rmse_result)
 
     def visualize_results(self, input_map, dataset_title):
@@ -68,13 +68,9 @@ class Img2ImgTester():
         rmse_mean = np.round(np.mean(self.rmse_results), 4)
         self.rmse_results.clear()
 
-        rmse_log_mean = np.round(np.mean(self.rmse_log_results), 4)
-        self.rmse_log_results.clear()
-
         last_epoch = global_config.general_config["current_epoch"]
         self.visdom_reporter.plot_text(dataset_title + " Results - " + version_name + " Last epoch: " + str(last_epoch) + "<br>"
                                        + "PSNR: " +str(psnr_mean) + "<br>" 
                                        "Abs Rel: " + str(l1_mean) + "<br>"
                                         "Sqr Rel: " + str(mse_mean) + "<br>"
-                                       "RMSE: " + str(rmse_mean) + "<br>"
-                                       "RMSE log: " +str(rmse_log_mean) +"<br>")
+                                       "RMSE: " + str(rmse_mean) + "<br>")

@@ -33,6 +33,7 @@ def update_config(opts):
     global_config.server_config = opts.server_config
     global_config.plot_enabled = opts.plot_enabled
     global_config.save_every_iter = opts.save_every_iter
+    global_config.img_to_load = opts.img_to_load
     global_config.general_config["cuda_device"] = opts.cuda_device
     global_config.general_config["network_version"] = opts.network_version
     global_config.general_config["iteration"] = opts.iteration
@@ -116,8 +117,8 @@ def main(argv):
 
     plot_utils.VisdomReporter.initialize()
 
-    train_loader, train_count = dataset_loader.load_train_img2img_dataset(a_path, b_path)
-    test_loader, test_count = dataset_loader.load_test_img2img_dataset(a_path, b_path)
+    train_loader_a, train_loader_b, train_count = dataset_loader.load_train_img2img_dataset(a_path, b_path)
+    test_loader_a, test_loader_b, test_count = dataset_loader.load_test_img2img_dataset(a_path, b_path)
     img2img_t = img2imgtrainer.Img2ImgTrainer(device)
 
     iteration = 0
@@ -134,8 +135,7 @@ def main(argv):
     pbar.update(current_progress)
 
     for epoch in range(start_epoch, network_config["max_epochs"]):
-        for i, (train_data, test_data) in enumerate(zip(train_loader, itertools.cycle(test_loader))):
-            a_batch, b_batch = train_data
+        for i, (a_batch, b_batch) in enumerate(zip(train_loader_a, itertools.cycle(train_loader_b))):
             a_batch = a_batch.to(device)
             b_batch = b_batch.to(device)
 
@@ -155,7 +155,7 @@ def main(argv):
                     img2img_t.visdom_plot(iteration)
                     img2img_t.visdom_visualize(input_map, "Train")
 
-                    a_test_batch, b_test_batch = test_data
+                    a_test_batch, b_test_batch = next(zip(test_loader_a, itertools.cycle(test_loader_b)))
                     a_test_batch = a_test_batch.to(device)
                     b_test_batch = b_test_batch.to(device)
 
