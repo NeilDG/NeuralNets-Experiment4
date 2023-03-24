@@ -53,36 +53,44 @@ class GenericImageDataset(data.Dataset):
             self.patch_size = (256, 256)
 
     def __getitem__(self, idx):
-        # try:
-        state = torch.get_rng_state()
-        rgb_img = cv2.imread(self.rgb_list[idx])
-        rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2RGB)
-        rgb_img = self.initial_op(rgb_img)
+        try:
+            state = torch.get_rng_state()
+            rgb_img = cv2.imread(self.rgb_list[idx])
+            rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2RGB)
+            rgb_img = self.initial_op(rgb_img)
 
-        torch.set_rng_state(state)
-        # depth_img = cv2.imread(self.exr_list[idx], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
-        depth_img = cv2.imread(self.exr_list[idx])
-        depth_img = depth_img.astype(np.uint8)
-        depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
-        depth_img = 1.0 - self.initial_op(depth_img)
+            torch.set_rng_state(state)
+            # depth_img = cv2.imread(self.exr_list[idx], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+            depth_img = cv2.imread(self.exr_list[idx])
+            depth_img = depth_img.astype(np.uint8)
+            depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
+            depth_img = 1.0 - self.initial_op(depth_img)
 
-        torch.set_rng_state(state)
-        segmentation_img = cv2.imread(self.segmentation_list[idx])
-        segmentation_img = cv2.cvtColor(segmentation_img, cv2.COLOR_BGR2RGB)
-        segmentation_img = self.initial_op(segmentation_img)
+            torch.set_rng_state(state)
+            segmentation_img = cv2.imread(self.segmentation_list[idx])
+            segmentation_img = cv2.cvtColor(segmentation_img, cv2.COLOR_BGR2RGB)
+            segmentation_img = self.initial_op(segmentation_img)
 
-        if (self.transform_config == 1):
-            crop_indices = transforms.RandomCrop.get_params(rgb_img, output_size=self.patch_size)
-            i, j, h, w = crop_indices
+            if (self.transform_config == 1):
+                crop_indices = transforms.RandomCrop.get_params(rgb_img, output_size=self.patch_size)
+                i, j, h, w = crop_indices
 
-            rgb_img = transforms.functional.crop(rgb_img, i, j, h, w)
-            depth_img = transforms.functional.crop(depth_img, i, j, h, w)
-            segmentation_img = transforms.functional.crop(segmentation_img, i, j, h, w)
+                rgb_img = transforms.functional.crop(rgb_img, i, j, h, w)
+                depth_img = transforms.functional.crop(depth_img, i, j, h, w)
+                segmentation_img = transforms.functional.crop(segmentation_img, i, j, h, w)
 
-        if(self.use_tanh):
-            rgb_img = self.norm_op(rgb_img)
-            depth_img = self.norm_op(depth_img)
-            segmentation_img = self.norm_op(segmentation_img)
+            if(self.use_tanh):
+                rgb_img = self.norm_op(rgb_img)
+                depth_img = self.norm_op(depth_img)
+                segmentation_img = self.norm_op(segmentation_img)
+
+        except Exception as e:
+            print("Failed to load: ", self.rgb_list[idx], self.exr_list[idx])
+            print("ERROR: ", e)
+
+            rgb_img = None
+            depth_img = None
+            segmentation_img = None
 
         return rgb_img, depth_img, segmentation_img
 
