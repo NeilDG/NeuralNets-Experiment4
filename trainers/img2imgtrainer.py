@@ -232,12 +232,12 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
             return img_a2b, img_b2a
 
     def visdom_plot(self, iteration):
-        style_transfer_version = global_config.general_config["style_transfer_version"]
+        style_transfer_version = global_config.general_config["network_version"]
         self.visdom_reporter.plot_finegrain_loss("a2b_loss", iteration, self.losses_dict, self.caption_dict, style_transfer_version)
 
     def visdom_visualize(self, input_map, label="Train"):
         with torch.no_grad():
-            style_transfer_version = global_config.general_config["style_transfer_version"]
+            style_transfer_version = global_config.general_config["network_version"]
 
             img_a = input_map["img_a"]
             img_b = input_map["img_b"]
