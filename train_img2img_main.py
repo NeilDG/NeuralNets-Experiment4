@@ -74,7 +74,7 @@ def update_config(opts):
         print("Using TITAN RTX 3060 configuration. Workers: ", global_config.general_config["num_workers"])
 
     elif (global_config.server_config == 6):  # @TITAN1 - 3
-        global_config.general_config["num_workers"] = 2
+        global_config.general_config["num_workers"] = 6
         global_config.a_path = "/home/neildelgallego/Places Dataset/*.jpg"
         global_config.b_path = "/home/neildelgallego/SynthV3_Raw/{dataset_version}/sequence.0/*.camera.png"
         global_config.batch_size = network_config["batch_size"][2]
