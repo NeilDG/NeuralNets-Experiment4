@@ -60,8 +60,8 @@ class GenericImageDataset(data.Dataset):
         rgb_img = self.initial_op(rgb_img)
 
         torch.set_rng_state(state)
-        depth_img = cv2.imread(self.exr_list[idx], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
-        # depth_img = cv2.imread(self.exr_list[idx])
+        # depth_img = cv2.imread(self.exr_list[idx], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+        depth_img = cv2.imread(self.exr_list[idx])
         depth_img = depth_img.astype(np.uint8)
         depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
         depth_img = 1.0 - self.initial_op(depth_img)
