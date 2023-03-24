@@ -2,7 +2,7 @@ import global_config
 from abc import abstractmethod
 
 from config.network_config import ConfigHolder
-from model import ffa_gan, unet_gan
+from model import ffa_gan, unet_gan, usi3d_gan
 from model import vanilla_cycle_gan as cycle_gan
 from model import monodepth_gan
 from model import involution_gan
@@ -62,12 +62,23 @@ class NetworkCreator():
 
         if (model_type == 1):
             G_A = cycle_gan.Generator(input_nc=network_config["input_nc"], output_nc=3, n_residual_blocks=network_config["num_blocks"],
-                                      dropout_rate=network_config["dropout_rate"], use_cbam=network_config["use_cbam"]).to(self.gpu_device)
+                                      dropout_rate=network_config["dropout_rate"], use_cbam=network_config["use_cbam"], norm=network_config["norm_mode"]).to(self.gpu_device)
         elif (model_type == 2):
             G_A = unet_gan.UnetGenerator(input_nc=network_config["input_nc"], output_nc=3, num_downs=network_config["num_blocks"]).to(self.gpu_device)
+        elif (model_type == 3):
+            print("Using AdainGEN")
+            params = {'dim': 64,  # number of filters in the bottommost layer
+                      'mlp_dim': 256,  # number of filters in MLP
+                      'style_dim': 8,  # length of style code
+                      'n_layer': 3,  # number of layers in feature merger/splitor
+                      'activ': 'relu',  # activation function [relu/lrelu/prelu/selu/tanh]
+                      'n_downsample': 2,  # number of downsampling layers in content encoder
+                      'n_res': network_config["num_blocks"],  # number of residual blocks in content encoder/decoder
+                      'pad_type': 'reflect'}
+            G_A = usi3d_gan.AdaINGen(input_dim=3, output_dim=3, params=params).to(self.gpu_device)
         else:
             G_A = cycle_gan.SpectralGenerator(input_nc=network_config["input_nc"], output_nc=3, n_residual_blocks=network_config["num_blocks"],
-                                              dropout_rate=network_config["dropout_rate"]).to(self.gpu_device)
+                                              dropout_rate=network_config["dropout_rate"], norm=network_config["norm_mode"]).to(self.gpu_device)
 
             D_A = cycle_gan.SpectralDiscriminator(input_nc=3).to(self.gpu_device)
 

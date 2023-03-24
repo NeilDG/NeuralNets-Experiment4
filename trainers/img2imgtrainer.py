@@ -204,7 +204,7 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
                 self.fp16_scaler.update()
 
                 # what to put to losses dict for visdom reporting?
-                if (iteration > 100):
+                if (iteration > 10):
                     self.losses_dict[self.G_LOSS_KEY].append(errG.item())
                     self.losses_dict[self.D_OVERALL_LOSS_KEY].append(errD.item())
                     self.losses_dict[self.IDENTITY_LOSS_KEY].append(A_identity_loss.item() + B_identity_loss.item())

@@ -73,10 +73,13 @@ def update_config(opts):
         global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using TITAN RTX 3060 configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif (global_config.server_config == 6):  # RTX 2080Ti @TITAN
+    elif (global_config.server_config == 6):  # @TITAN1 - 3
         global_config.general_config["num_workers"] = 12
-        global_config.a_path = "/home/neildelgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
-        print("Using TITAN RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
+        global_config.a_path = "/home/neildelgallego/Places Dataset/*.jpg"
+        global_config.b_path = "/home/neildelgallego/SynthV3_Raw/{dataset_version}/sequence.0/*.camera.png"
+        global_config.batch_size = network_config["batch_size"][0]
+        global_config.load_size = network_config["load_size"][0]
+        print("Using TITAN Workstation configuration. Workers: ", global_config.general_config["num_workers"])
 
     global_config.b_path = global_config.b_path.format(dataset_version=network_config["dataset_version"])
 
@@ -117,8 +120,8 @@ def main(argv):
 
     plot_utils.VisdomReporter.initialize()
 
-    train_loader_a, train_loader_b, train_count = dataset_loader.load_train_img2img_dataset(a_path, b_path)
-    test_loader_a, test_loader_b, test_count = dataset_loader.load_test_img2img_dataset(a_path, b_path)
+    train_loader, train_count = dataset_loader.load_train_img2img_dataset(a_path, b_path)
+    test_loader, test_count = dataset_loader.load_test_img2img_dataset(a_path, b_path)
     img2img_t = img2imgtrainer.Img2ImgTrainer(device)
 
     iteration = 0
@@ -135,9 +138,9 @@ def main(argv):
     pbar.update(current_progress)
 
     for epoch in range(start_epoch, network_config["max_epochs"]):
-        for i, (a_batch, b_batch) in enumerate(zip(train_loader_a, itertools.cycle(train_loader_b))):
-            a_batch = a_batch.to(device)
-            b_batch = b_batch.to(device)
+        for i, (a_batch, b_batch) in enumerate(train_loader, 0):
+            a_batch = a_batch.to(device, non_blocking = True)
+            b_batch = b_batch.to(device, non_blocking = True)
             input_map = {"img_a" : a_batch, "img_b" : b_batch}
             img2img_t.train(epoch, iteration, input_map, input_map)
 
@@ -154,9 +157,9 @@ def main(argv):
                     img2img_t.visdom_plot(iteration)
                     img2img_t.visdom_visualize(input_map, "Train")
 
-                    a_test_batch, b_test_batch = next(zip(test_loader_a, itertools.cycle(test_loader_b)))
-                    a_test_batch = a_test_batch.to(device)
-                    b_test_batch = b_test_batch.to(device)
+                    a_test_batch, b_test_batch = next(iter(test_loader))
+                    a_test_batch = a_test_batch.to(device, non_blocking = True)
+                    b_test_batch = b_test_batch.to(device, non_blocking = True)
 
                     input_map = {"img_a": a_test_batch, "img_b": b_test_batch}
                     img2img_t.visdom_visualize(input_map, "Test")
