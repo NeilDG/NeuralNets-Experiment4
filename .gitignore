@@ -129,10 +129,10 @@ dmypy.json
 .pyre/
 # *.pt
 
-# checkpoint/*.pt
+checkpoint/*.pt
 checkpoint/*.pt.checkpt
 checkpoint/*.pth.checkpt
-# checkpoint/*.pth
+checkpoint/*.pth
 iiw_temp/
 comparison/
 reports/
