@@ -35,7 +35,7 @@ if [ $SERVER_CONFIG == 0 ]
 then
   srun python "gdown_download.py" --server_config=$SERVER_CONFIG
 else
-  python "gdown_download.py" --server_config=$SERVER_CONFIG
+  python3 "gdown_download.py" --server_config=$SERVER_CONFIG
 fi
 
 DATASET_NAME="places"

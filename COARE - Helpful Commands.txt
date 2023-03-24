@@ -62,7 +62,7 @@ visdom -env_path "/scratch1/scratch2/neil.delgallego/Visdom/"
 export XDG_RUNTIME_DIR=/scratch1/scratch2/neil.delgallego/Visdom/
 saliksik.asti.dost.gov.ph:8097
 
-//CCS SERVER-JUPYTERHUB / TITAN 2080Ti
+//CCS SERVER-JUPYTERHUB / TITAN Workstation
 git clone -b "workspace/V01.XX.XX" "https://github.com/NeilDG/NeuralNets-Experiment4.git" "NeuralNets-Experiment4-V01.XX.XX"
 
 git switch "workspace/V01.XX.XX"
