@@ -151,16 +151,18 @@ class SingleImageDataset(data.Dataset):
         self.initial_op = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize((256, 256)),
-            transforms.RandomCrop(self.patch_size),
-            transforms.RandomHorizontalFlip(0.5),
-            transforms.RandomVerticalFlip(0.5),
             transforms.ToTensor()
         ])
+
+        self.norm_op = transforms.Normalize((0.5, ), (0.5, ))
 
     def __getitem__(self, idx):
         a_img = cv2.imread(self.a_list[idx])
         a_img = cv2.cvtColor(a_img, cv2.COLOR_BGR2RGB)
         a_img = self.initial_op(a_img)
+
+        if(self.use_tanh):
+            a_img = self.norm_op(a_img)
 
         return a_img
 

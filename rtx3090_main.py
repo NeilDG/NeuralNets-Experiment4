@@ -44,7 +44,7 @@ def test_depth():
 
 def train_img2img():
     os.system("python \"train_img2img_main.py\" --server_config=3 --img_to_load=1000 "
-              "--plot_enabled=0 --save_every_iter=100 --network_version=\"synth2real_v01.00\" "
+              "--plot_enabled=0 --save_every_iter=100 --network_version=\"synth2real_v01.01\" "
               "--iteration=1")
 
 def test_img2img():
@@ -54,9 +54,9 @@ def test_img2img():
 
 def main():
     # train_depth()
-    test_depth()
+    # test_depth()
 
-    # train_img2img()
+    train_img2img()
     # test_img2img()
     # os.system("shutdown /s /t 1")
 

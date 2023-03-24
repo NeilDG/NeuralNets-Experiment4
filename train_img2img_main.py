@@ -138,7 +138,6 @@ def main(argv):
         for i, (a_batch, b_batch) in enumerate(zip(train_loader_a, itertools.cycle(train_loader_b))):
             a_batch = a_batch.to(device)
             b_batch = b_batch.to(device)
-
             input_map = {"img_a" : a_batch, "img_b" : b_batch}
             img2img_t.train(epoch, iteration, input_map, input_map)
 
