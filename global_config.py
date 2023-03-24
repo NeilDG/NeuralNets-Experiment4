@@ -18,7 +18,6 @@ general_config = {
     "num_workers" : 12,
     "cuda_device" : "cuda:0",
     "network_version" : "VXX.XX",
-    "style_transfer_version" : "VXX.XX",
     "iteration" : 1,
     "current_epoch" : 0,
     "test_size" : 16,
