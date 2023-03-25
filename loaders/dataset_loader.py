@@ -59,6 +59,63 @@ def load_test_dataset(rgb_path, exr_path, segmentation_path):
 
     return data_loader, len(rgb_list)
 
+def load_train_img2img_dataset(a_path, b_path):
+    network_config = ConfigHolder.getInstance().get_network_config()
+    general_config = global_config.general_config
+    a_list = glob.glob(a_path)
+    b_list = glob.glob(b_path)
+    a_list_dup = glob.glob(a_path)
+    b_list_dup = glob.glob(b_path)
+
+    if (global_config.img_to_load > 0):
+        a_list = a_list[0: global_config.img_to_load]
+        b_list = b_list[0: global_config.img_to_load]
+        a_list_dup = a_list_dup[0: global_config.img_to_load]
+        b_list_dup = b_list_dup[0: global_config.img_to_load]
+
+    for i in range(0, network_config["dataset_a_repeats"]): #TEMP: formerly 0-1
+        a_list += a_list_dup
+
+    for i in range(0, network_config["dataset_b_repeats"]): #TEMP: formerly 0-1
+        b_list += b_list_dup
+
+    random.shuffle(a_list)
+    random.shuffle(b_list)
+
+    img_length = len(a_list)
+    print("Length of images: %d %d"  % (img_length, len(b_list)))
+
+    num_workers = general_config["num_workers"]
+    data_loader = torch.utils.data.DataLoader(
+        image_datasets.PairedImageDataset(a_list, b_list, 1),
+        batch_size=global_config.load_size,
+        num_workers=num_workers
+    )
+
+    return data_loader, img_length
+
+def load_test_img2img_dataset(a_path, b_path):
+    a_list = glob.glob(a_path)
+    b_list = glob.glob(b_path)
+
+    if (global_config.img_to_load > 0):
+        a_list = a_list[0: global_config.img_to_load]
+        b_list = b_list[0: global_config.img_to_load]
+
+    random.shuffle(a_list)
+    random.shuffle(b_list)
+
+    img_length = len(a_list)
+    print("Length of images: %d %d" % (img_length, len(b_list)))
+
+    data_loader = torch.utils.data.DataLoader(
+        image_datasets.PairedImageDataset(a_list, b_list, 1),
+        batch_size=global_config.general_config["test_size"],
+        num_workers=1
+    )
+
+    return data_loader, img_length
+
 def load_kitti_test_dataset(rgb_path, depth_path):
     general_config = global_config.general_config
 

@@ -27,9 +27,6 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         server_config = global_config.server_config
 
         self.iteration = general_config["iteration"]
-        # self.hyperparams_table = hyper_params["hyperparams"][self.iteration]
-        # self.use_bce = self.hyperparams_table["is_bce"]
-        # self.adv_weight = self.hyperparams_table["adv_weight"]
         self.use_bce = config_holder.get_hyper_params_weight(self.iteration, "is_bce")
         self.adv_weight = config_holder.get_hyper_params_weight(self.iteration, "adv_weight")
 
@@ -142,7 +139,6 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         return result
 
     def initialize_dict(self):
-
         # dictionary keys
         self.G_LOSS_KEY = "g_loss"
         self.IDENTITY_LOSS_KEY = "id"
