@@ -52,7 +52,10 @@ def update_config(opts):
 
     elif(global_config.server_config == 2): #RTX 2080Ti
         global_config.general_config["num_workers"] = 6
-        global_config.path = "C:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
+        global_config.a_path = "C:/Datasets/Places Dataset/*.jpg"
+        global_config.b_path = "C:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
+        global_config.batch_size = network_config["batch_size"][2]
+        global_config.load_size = network_config["load_size"][2]
         print("Using RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
 
     elif(global_config.server_config == 3): #RTX 3090 PC
