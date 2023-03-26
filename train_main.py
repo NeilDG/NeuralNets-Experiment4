@@ -131,7 +131,7 @@ def main(argv):
     print("---------------------------------------------------------------------------")
 
     # compute total progress
-    load_size = network_config["load_size"][global_config.server_config]
+    load_size = global_config.load_size
     needed_progress = int((network_config["max_epochs"]) * (train_count / load_size))
     current_progress = int(start_epoch * (train_count / load_size))
     pbar = tqdm(total=needed_progress, disable=global_config.disable_progress_bar)
