@@ -71,13 +71,8 @@ def update_config(opts):
         global_config.path = "D:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using RTX 2070 @RL208 configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif (global_config.server_config == 5): #RTX 3060 PC Titan
-        global_config.general_config["num_workers"] = 12
-        global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
-        print("Using TITAN RTX 3060 configuration. Workers: ", global_config.general_config["num_workers"])
-
-    elif (global_config.server_config == 6):  # @TITAN1 - 3
-        global_config.general_config["num_workers"] = 6
+    elif (global_config.server_config == 5):  # @TITAN1 - 3
+        global_config.general_config["num_workers"] = 4
         global_config.a_path = "/home/neildelgallego/Places Dataset/*.jpg"
         global_config.b_path = "/home/neildelgallego/SynthV3_Raw/{dataset_version}/sequence.0/*.camera.png"
         global_config.batch_size = network_config["batch_size"][2]
