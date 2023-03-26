@@ -24,7 +24,6 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         network_config = config_holder.get_network_config()
         # hyper_params = ConfigHolder.getInstance().get_hyper_params()
         general_config = global_config.general_config
-        server_config = global_config.server_config
 
         self.iteration = general_config["iteration"]
         self.use_bce = config_holder.get_hyper_params_weight(self.iteration, "is_bce")
@@ -44,8 +43,8 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.fp16_scaler = amp.GradScaler()  # for automatic mixed precision
         self.visdom_reporter = plot_utils.VisdomReporter.getInstance()
 
-        self.load_size = network_config["load_size"][server_config]
-        self.batch_size = network_config["batch_size"][server_config]
+        self.load_size = global_config.load_size
+        self.batch_size = global_config.batch_size
 
         self.stopper_method = early_stopper.EarlyStopper(network_config["min_epochs"], early_stopper.EarlyStopperMethod.L1_TYPE, 1000)
         self.stop_result = False
