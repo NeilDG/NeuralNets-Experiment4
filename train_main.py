@@ -61,6 +61,9 @@ def update_config(opts):
 
     elif (global_config.server_config == 4): #RTX 2070 PC @RL208
         global_config.general_config["num_workers"] = 4
+        global_config.general_config["num_workers"] = 4
+        global_config.batch_size = network_config["batch_size"][3]
+        global_config.load_size = network_config["load_size"][3]
         global_config.path = "D:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using RTX 2070 @RL208 configuration. Workers: ", global_config.general_config["num_workers"])
 
