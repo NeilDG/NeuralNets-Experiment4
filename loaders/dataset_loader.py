@@ -10,7 +10,6 @@ from torch.utils import data
 def load_train_dataset(rgb_path, exr_path, segmentation_path):
     network_config = ConfigHolder.getInstance().get_network_config()
     general_config = global_config.general_config
-    server_config = global_config.server_config
     exr_list = glob.glob(exr_path)
     rgb_list = glob.glob(rgb_path)
     segmentation_list = glob.glob(segmentation_path)
@@ -29,7 +28,7 @@ def load_train_dataset(rgb_path, exr_path, segmentation_path):
 
     data_loader = torch.utils.data.DataLoader(
         image_datasets.GenericImageDataset(img_length, rgb_list, exr_list, segmentation_list, 1),
-        batch_size=network_config["load_size"][server_config],
+        batch_size=global_config.load_size,
         num_workers=general_config["num_workers"],
         shuffle=False
     )
