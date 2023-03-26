@@ -79,7 +79,7 @@ class EarlyStopper():
 
         if (self.stop_counter == self.early_stop_tolerance):
             self.stop_condition_met = True
-            print("Met stopping condition with best metric of: ", self.last_metric.item(), ". Latest metric: ", ave_D_loss)
+            print("Met stopping condition with best metric of: ", self.last_metric, ". Latest metric: ", ave_D_loss)
 
         return self.stop_condition_met
 
