@@ -10,7 +10,7 @@
 
 #About this script:
 #Download of dataset
-SERVER_CONFIG=6
+SERVER_CONFIG=4
 
 module load anaconda/3-2021.11
 module load cuda/10.1_cudnn-7.6.5
@@ -45,7 +45,7 @@ then
   OUTPUT_DIR="/scratch1/scratch2/neil.delgallego/"
 elif [ $SERVER_CONFIG == 4 ]
 then
-  OUTPUT_DIR="D:/Datasets/"
+  OUTPUT_DIR="D:/NeilDG/Datasets/"
 elif [ $SERVER_CONFIG == 6 ]
 then
   OUTPUT_DIR="/home/neildelgallego/"
