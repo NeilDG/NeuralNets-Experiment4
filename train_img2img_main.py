@@ -75,8 +75,8 @@ def update_config(opts):
 
     elif (global_config.server_config == 5):  # @TITAN1 - 3
         global_config.general_config["num_workers"] = 4
-        global_config.batch_size = network_config["batch_size"][3]
-        global_config.load_size = network_config["load_size"][3]
+        global_config.batch_size = network_config["batch_size"][2]
+        global_config.load_size = network_config["load_size"][2]
         global_config.a_path = "/home/neildelgallego/Places Dataset/*.jpg"
         global_config.b_path = "/home/neildelgallego/SynthV3_Raw/{dataset_version}/sequence.0/*.camera.png"
         print("Using TITAN Workstation configuration. Workers: ", global_config.general_config["num_workers"])
