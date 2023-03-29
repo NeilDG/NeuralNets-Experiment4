@@ -10,15 +10,15 @@ def main(argv):
     (opts, args) = parser.parse_args(argv)
 
     if(opts.server_config == 0):
-        output_dir = "/scratch1/scratch2/neil.delgallego/"
+        output_dir = "/scratch1/scratch2/neil.delgallego/SynthV3_Raw/"
     elif(opts.server_config == 1):
-        output_dir = "/home/jupyter-neil.delgallego/"
+        output_dir = "/home/jupyter-neil.delgallego/SynthV3_Raw/"
     elif(opts.server_config == 4):
-        output_dir = "D:/NeilDG/Datasets/"
+        output_dir = "D:/NeilDG/Datasets/SynthV3_Raw/"
     elif(opts.server_config == 6):
-        output_dir = "/home/neildelgallego/"
+        output_dir = "/home/neildelgallego/SynthV3_Raw/"
     else:
-        output_dir = "/home/jupyter-neil.delgallego/"
+        output_dir = "/home/jupyter-neil.delgallego/SynthV3_Raw/"
 
     # z00
     direct_link = "https://drive.google.com/file/d/1lIInRroRBF5YrbUrQNnb-c76Gb4cEsMX/view?usp=share_link"
