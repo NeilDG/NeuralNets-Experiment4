@@ -12,15 +12,15 @@ def train_depth():
               "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.13\" "
               "--iteration=4")
 
-    s.system("python3 \"train_main.py\" --server_config=5 --img_to_load=-1 "
+    os.system("python3 \"train_main.py\" --server_config=5 --img_to_load=-1 "
              "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.13\" "
              "--iteration=5")
 
-    s.system("python3 \"train_main.py\" --server_config=5 --img_to_load=-1 "
+    os.system("python3 \"train_main.py\" --server_config=5 --img_to_load=-1 "
              "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.13\" "
              "--iteration=6")
 
-    s.system("python3 \"train_main.py\" --server_config=5 --img_to_load=-1 "
+    os.system("python3 \"train_main.py\" --server_config=5 --img_to_load=-1 "
              "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.13\" "
              "--iteration=7")
 
