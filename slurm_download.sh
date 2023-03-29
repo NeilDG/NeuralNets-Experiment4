@@ -10,7 +10,7 @@
 
 #About this script:
 #Download of dataset
-SERVER_CONFIG=5
+SERVER_CONFIG=4
 
 module load anaconda/3-2021.11
 module load cuda/10.1_cudnn-7.6.5
@@ -34,31 +34,45 @@ pip install PyYAML
 if [ $SERVER_CONFIG == 0 ]
 then
   srun python "gdown_download.py" --server_config=$SERVER_CONFIG
-else
+elif [ $SERVER_CONFIG == 5 ]
+then
   python3 "gdown_download.py" --server_config=$SERVER_CONFIG
+else
+  python "gdown_download.py" --server_config=$SERVER_CONFIG
 fi
 
-#DATASET_NAME="places"
-#
-#if [ $SERVER_CONFIG == 0 ]
-#then
-#  OUTPUT_DIR="/scratch1/scratch2/neil.delgallego/"
-#elif [ $SERVER_CONFIG == 4 ]
-#then
-#  OUTPUT_DIR="D:/NeilDG/Datasets/"
-#elif [ $SERVER_CONFIG == 6 ]
-#then
-#  OUTPUT_DIR="/home/neildelgallego/"
-#else
-#  OUTPUT_DIR="/home/jupyter-neil.delgallego/"
-#fi
-#
-#echo "$OUTPUT_DIR/$DATASET_NAME.zip"
+
+if [ $SERVER_CONFIG == 0 ]
+then
+  OUTPUT_DIR="/scratch1/scratch2/neil.delgallego/SynthV3_Raw/"
+elif [ $SERVER_CONFIG == 4 ]
+then
+  OUTPUT_DIR="D:/NeilDG/Datasets/SynthV3_Raw/"
+elif [ $SERVER_CONFIG == 5 ]
+then
+  OUTPUT_DIR="/home/neildelgallego/SynthV3_Raw/"
+else
+  OUTPUT_DIR="/home/jupyter-neil.delgallego/SynthV3_Raw/"
+fi
+
+DATASET_NAME="v02_fcity"
+echo "$OUTPUT_DIR/$DATASET_NAME.zip"
+unzip "$OUTPUT_DIR/$DATASET_NAME.zip" -d "$OUTPUT_DIR"
+
+DATASET_NAME="v03_fcity"
+echo "$OUTPUT_DIR/$DATASET_NAME.zip"
+unzip "$OUTPUT_DIR/$DATASET_NAME.zip" -d "$OUTPUT_DIR"
+
+DATASET_NAME="v04_fcity"
+echo "$OUTPUT_DIR/$DATASET_NAME.zip"
+unzip "$OUTPUT_DIR/$DATASET_NAME.zip" -d "$OUTPUT_DIR"
+
 #
 #zip -F "$OUTPUT_DIR/$DATASET_NAME.zip" --out "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
 #unzip "$OUTPUT_DIR/$DATASET_NAME+fixed.zip" -d "$OUTPUT_DIR"
 #
-#if [ $SERVER_CONFIG == 4 ]
-#then
-#  python "rl208_main.py"
-#fi
+
+if [ $SERVER_CONFIG == 4 ]
+then
+  python "rl208_main.py"
+fi
