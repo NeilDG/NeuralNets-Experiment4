@@ -30,7 +30,6 @@ img_to_load = -1
 path = ""
 exr_path = ""
 rgb_path = ""
-segmentation_path = ""
 
 a_path = ""
 b_path = ""

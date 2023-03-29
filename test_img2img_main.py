@@ -110,7 +110,7 @@ def main(argv):
 
     plot_utils.VisdomReporter.initialize()
 
-    test_loader_a, test_loader_b, test_count = dataset_loader.load_test_img2img_dataset(a_path, b_path)
+    test_loader_a, test_count = dataset_loader.load_test_img2img_dataset(a_path, b_path)
 
     img2img_t = img2img_tester.Img2ImgTester(device)
     general_config = global_config.general_config
@@ -128,7 +128,7 @@ def main(argv):
     pbar.update(current_progress)
 
     with torch.no_grad():
-        for i, (a_batch, b_batch) in enumerate(zip(test_loader_a, itertools.cycle(test_loader_b))):
+        for i, (a_batch, b_batch) in enumerate(test_loader_a, 0):
             a_batch = a_batch.to(device)
             b_batch = b_batch.to(device)
 
@@ -138,7 +138,7 @@ def main(argv):
 
         pbar.close()
 
-        a_test_batch, b_test_batch = next(zip(test_loader_a, itertools.cycle(test_loader_b)))
+        a_test_batch, b_test_batch = next(iter(test_loader_a))
         a_test_batch = a_test_batch.to(device)
         b_test_batch = b_test_batch.to(device)
         input_map = {"img_a": a_test_batch, "img_b": b_test_batch}
