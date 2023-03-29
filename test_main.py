@@ -59,7 +59,6 @@ def update_config(opts):
     global_config.path = global_config.path.format(dataset_version=network_config["dataset_version"])
     global_config.exr_path = global_config.path + "*.exr"
     global_config.rgb_path = global_config.path + "*.camera.png"
-    global_config.segmentation_path = global_config.path + "*.semantic segmentation.png"
 
 
 def main(argv):
@@ -92,13 +91,12 @@ def main(argv):
 
     rgb_path = global_config.rgb_path
     exr_path = global_config.exr_path
-    segmentation_path = global_config.segmentation_path
 
     print("Dataset path: ", global_config.path)
 
     plot_utils.VisdomReporter.initialize()
     global_config.general_config["test_size"] = 128
-    synth_loader, dataset_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
+    synth_loader, dataset_count = dataset_loader.load_test_dataset(rgb_path, exr_path)
     dt = depth_tester.DepthTester(device)
     start_epoch = global_config.general_config["current_epoch"]
     print("---------------------------------------------------------------------------")
@@ -113,7 +111,7 @@ def main(argv):
     pbar.update(current_progress)
 
     with torch.no_grad():
-        for i, (rgb_batch, depth_batch, _) in enumerate(synth_loader, 0):
+        for i, (rgb_batch, depth_batch) in enumerate(synth_loader, 0):
             rgb_batch = rgb_batch.to(device)
             depth_batch = depth_batch.to(device)
 
@@ -123,7 +121,7 @@ def main(argv):
 
         pbar.close()
 
-        rgb_batch, depth_batch, _ = next(iter(synth_loader)) #visualize one batch
+        rgb_batch, depth_batch = next(iter(synth_loader)) #visualize one batch
         rgb_batch = rgb_batch.to(device)
         depth_batch = depth_batch.to(device)
         input_map = {"rgb": rgb_batch, "depth": depth_batch}

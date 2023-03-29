@@ -10,7 +10,7 @@
 
 #About this script:
 #Download of dataset
-SERVER_CONFIG=4
+SERVER_CONFIG=5
 
 module load anaconda/3-2021.11
 module load cuda/10.1_cudnn-7.6.5
@@ -38,29 +38,27 @@ else
   python3 "gdown_download.py" --server_config=$SERVER_CONFIG
 fi
 
-DATASET_NAME="places"
-
-if [ $SERVER_CONFIG == 0 ]
-then
-  OUTPUT_DIR="/scratch1/scratch2/neil.delgallego/"
-elif [ $SERVER_CONFIG == 4 ]
-then
-  OUTPUT_DIR="D:/NeilDG/Datasets/"
-elif [ $SERVER_CONFIG == 6 ]
-then
-  OUTPUT_DIR="/home/neildelgallego/"
-else
-  OUTPUT_DIR="/home/jupyter-neil.delgallego/"
-fi
-
-echo "$OUTPUT_DIR/$DATASET_NAME.zip"
-
-zip -F "$OUTPUT_DIR/$DATASET_NAME.zip" --out "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
-unzip "$OUTPUT_DIR/$DATASET_NAME+fixed.zip" -d "$OUTPUT_DIR"
-#mv "$OUTPUT_DIR/$DATASET_NAME+fixed" "$OUTPUT_DIR/$DATASET_NAME"
-#rm -rf "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
-
-if [ $SERVER_CONFIG == 4 ]
-then
-  python "rl208_main.py"
-fi
+#DATASET_NAME="places"
+#
+#if [ $SERVER_CONFIG == 0 ]
+#then
+#  OUTPUT_DIR="/scratch1/scratch2/neil.delgallego/"
+#elif [ $SERVER_CONFIG == 4 ]
+#then
+#  OUTPUT_DIR="D:/NeilDG/Datasets/"
+#elif [ $SERVER_CONFIG == 6 ]
+#then
+#  OUTPUT_DIR="/home/neildelgallego/"
+#else
+#  OUTPUT_DIR="/home/jupyter-neil.delgallego/"
+#fi
+#
+#echo "$OUTPUT_DIR/$DATASET_NAME.zip"
+#
+#zip -F "$OUTPUT_DIR/$DATASET_NAME.zip" --out "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
+#unzip "$OUTPUT_DIR/$DATASET_NAME+fixed.zip" -d "$OUTPUT_DIR"
+#
+#if [ $SERVER_CONFIG == 4 ]
+#then
+#  python "rl208_main.py"
+#fi
