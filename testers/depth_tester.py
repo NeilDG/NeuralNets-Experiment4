@@ -9,7 +9,6 @@ import torch.cuda.amp as amp
 import itertools
 from model.modules import image_pool
 from utils import plot_utils, tensor_utils
-import lpips
 import torch.nn as nn
 import numpy as np
 from trainers import depth_trainer
@@ -19,7 +18,6 @@ class DepthTester():
     def __init__(self, gpu_device):
         self.gpu_device = gpu_device
         self.dt = depth_trainer.DepthTrainer(self.gpu_device)
-        self.lpips_loss = lpips.LPIPS(net='vgg').to(self.gpu_device)
         self.l1_loss = nn.L1Loss(reduction='mean')
         self.mse_loss = nn.MSELoss(reduction='mean')
 

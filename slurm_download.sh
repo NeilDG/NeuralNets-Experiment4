@@ -23,9 +23,8 @@ pip install scikit-learn
 pip install scikit-image
 pip install visdom
 pip install kornia
-pip install opencv-python
+pip install opencv-python==4.5.5.62
 pip install --upgrade pillow
-pip install lpips
 pip install gputil
 pip install matplotlib
 pip install --upgrade --no-cache-dir gdown
