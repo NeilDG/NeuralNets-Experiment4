@@ -215,7 +215,7 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
                     self.losses_dict[self.D_B_LOSS_KEY].append(D_B_fake_loss.item() + D_B_real_loss.item())
                     self.losses_dict[self.CYCLE_LOSS_KEY].append(A_cycle_loss.item() + B_cycle_loss.item())
 
-            a2b, b2a = self.test(input_map)
+            a2b, b2a = self.test(input_map, "Train")
             self.stopper_method.register_metric(a2b, img_b, epoch)
             self.stopper_method.register_metric(b2a, img_a, epoch)
             self.stop_result = self.stopper_method.test(epoch)
@@ -226,10 +226,14 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
     def is_stop_condition_met(self):
         return self.stopper_method.did_stop_condition_met()
 
-    def test(self, input_map):
+    def test(self, input_map, label="Test"):
         with torch.no_grad():
             img_a = input_map["img_a"]
             img_b = input_map["img_b"]
+
+            if(label == "Train"):
+                img_a = self.transform_op(img_a)
+                img_b = self.transform_op(img_b)
 
             self.G_A2B.eval()
             self.G_B2A.eval()
