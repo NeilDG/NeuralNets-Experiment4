@@ -10,7 +10,7 @@
 
 #About this script:
 #Download of dataset
-SERVER_CONFIG=6
+SERVER_CONFIG=0
 
 module load anaconda/3-2021.11
 module load cuda/10.1_cudnn-7.6.5
@@ -18,7 +18,7 @@ source activate NeilGAN_V2
 
 #do fresh install
 pip-review --local --auto
-pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu116
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 pip install scikit-learn
 pip install scikit-image
 pip install visdom
@@ -34,31 +34,43 @@ pip install PyYAML
 if [ $SERVER_CONFIG == 0 ]
 then
   srun python "gdown_download.py" --server_config=$SERVER_CONFIG
-else
+elif [ $SERVER_CONFIG == 5 ]
+then
   python3 "gdown_download.py" --server_config=$SERVER_CONFIG
+else
+  python "gdown_download.py" --server_config=$SERVER_CONFIG
 fi
 
-DATASET_NAME="places"
 
 if [ $SERVER_CONFIG == 0 ]
 then
-  OUTPUT_DIR="/scratch1/scratch2/neil.delgallego/"
+  OUTPUT_DIR="/scratch1/scratch2/neil.delgallego/SynthV3_Raw/"
 elif [ $SERVER_CONFIG == 4 ]
 then
-  OUTPUT_DIR="D:/Datasets/"
-elif [ $SERVER_CONFIG == 6 ]
+  OUTPUT_DIR="D:/NeilDG/Datasets/SynthV3_Raw/"
+elif [ $SERVER_CONFIG == 5 ]
 then
-  OUTPUT_DIR="/home/neildelgallego/"
+  OUTPUT_DIR="/home/neildelgallego/SynthV3_Raw/"
 else
-  OUTPUT_DIR="/home/jupyter-neil.delgallego/"
+  OUTPUT_DIR="/home/jupyter-neil.delgallego/SynthV3_Raw/"
 fi
 
+DATASET_NAME="v02_fcity"
 echo "$OUTPUT_DIR/$DATASET_NAME.zip"
+unzip "$OUTPUT_DIR/$DATASET_NAME.zip" -d "$OUTPUT_DIR"
 
-zip -F "$OUTPUT_DIR/$DATASET_NAME.zip" --out "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
-unzip "$OUTPUT_DIR/$DATASET_NAME+fixed.zip" -d "$OUTPUT_DIR"
-#mv "$OUTPUT_DIR/$DATASET_NAME+fixed" "$OUTPUT_DIR/$DATASET_NAME"
-#rm -rf "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
+DATASET_NAME="v03_fcity"
+echo "$OUTPUT_DIR/$DATASET_NAME.zip"
+unzip "$OUTPUT_DIR/$DATASET_NAME.zip" -d "$OUTPUT_DIR"
+
+DATASET_NAME="v04_fcity"
+echo "$OUTPUT_DIR/$DATASET_NAME.zip"
+unzip "$OUTPUT_DIR/$DATASET_NAME.zip" -d "$OUTPUT_DIR"
+
+#
+#zip -F "$OUTPUT_DIR/$DATASET_NAME.zip" --out "$OUTPUT_DIR/$DATASET_NAME+fixed.zip"
+#unzip "$OUTPUT_DIR/$DATASET_NAME+fixed.zip" -d "$OUTPUT_DIR"
+#
 
 if [ $SERVER_CONFIG == 4 ]
 then

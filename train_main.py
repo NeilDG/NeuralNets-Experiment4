@@ -51,33 +51,36 @@ def update_config(opts):
 
     elif(global_config.server_config == 2): #RTX 2080Ti
         global_config.general_config["num_workers"] = 6
+        global_config.batch_size = network_config["batch_size"][2]
+        global_config.load_size = network_config["load_size"][2]
         global_config.path = "C:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
 
     elif(global_config.server_config == 3): #RTX 3090 PC
         global_config.general_config["num_workers"] = 12
+        global_config.batch_size = network_config["batch_size"][0]
+        global_config.load_size = network_config["load_size"][0]
         global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using RTX 3090 configuration. Workers: ", global_config.general_config["num_workers"])
 
     elif (global_config.server_config == 4): #RTX 2070 PC @RL208
         global_config.general_config["num_workers"] = 4
-        global_config.path = "D:/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
+        global_config.general_config["num_workers"] = 4
+        global_config.batch_size = network_config["batch_size"][3]
+        global_config.load_size = network_config["load_size"][3]
+        global_config.path = "D:/NeilDG/Datasets/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using RTX 2070 @RL208 configuration. Workers: ", global_config.general_config["num_workers"])
 
-    elif (global_config.server_config == 5): #RTX 3060 PC Titan
-        global_config.general_config["num_workers"] = 12
-        global_config.path = "X:/SynthV3_Raw/{dataset_version}/sequence.0/"
-        print("Using TITAN RTX 3060 configuration. Workers: ", global_config.general_config["num_workers"])
-
-    elif (global_config.server_config == 6):  # RTX 2080Ti @TITAN
-        global_config.general_config["num_workers"] = 12
+    elif (global_config.server_config == 5):  # @TITAN1 - 3
+        global_config.general_config["num_workers"] = 4
+        global_config.batch_size = network_config["batch_size"][2]
+        global_config.load_size = network_config["load_size"][2]
         global_config.path = "/home/neildelgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using TITAN RTX 2080Ti configuration. Workers: ", global_config.general_config["num_workers"])
 
     global_config.path = global_config.path.format(dataset_version=network_config["dataset_version"])
     global_config.exr_path = global_config.path + "*.exr"
     global_config.rgb_path = global_config.path + "*.camera.png"
-    global_config.segmentation_path = global_config.path + "*.semantic segmentation.png"
 
 
 def main(argv):
@@ -110,15 +113,15 @@ def main(argv):
 
     rgb_path = global_config.rgb_path
     exr_path = global_config.exr_path
-    segmentation_path = global_config.segmentation_path
 
-    print("Dataset path: ", rgb_path)
+    print("RGB path: ", rgb_path)
+    print("EXR path: ", exr_path)
 
     plot_utils.VisdomReporter.initialize()
     visdom_reporter = plot_utils.VisdomReporter.getInstance()
 
-    train_loader, train_count = dataset_loader.load_train_dataset(rgb_path, exr_path, segmentation_path)
-    test_loader, test_count = dataset_loader.load_test_dataset(rgb_path, exr_path, segmentation_path)
+    train_loader, train_count = dataset_loader.load_train_dataset(rgb_path, exr_path)
+    test_loader, test_count = dataset_loader.load_test_dataset(rgb_path, exr_path)
     dt = depth_trainer.DepthTrainer(device)
 
     iteration = 0
@@ -128,23 +131,22 @@ def main(argv):
     print("---------------------------------------------------------------------------")
 
     # compute total progress
-    load_size = network_config["load_size"][global_config.server_config]
+    load_size = global_config.load_size
     needed_progress = int((network_config["max_epochs"]) * (train_count / load_size))
     current_progress = int(start_epoch * (train_count / load_size))
     pbar = tqdm(total=needed_progress, disable=global_config.disable_progress_bar)
     pbar.update(current_progress)
 
     for epoch in range(start_epoch, network_config["max_epochs"]):
-        for i, (train_data, test_data) in enumerate(zip(train_loader, itertools.cycle(test_loader))):
-            rgb_batch, depth_batch, _ = train_data
+        for i, (rgb_batch, depth_batch) in enumerate(train_loader, 0):
             rgb_batch = rgb_batch.to(device)
             depth_batch = depth_batch.to(device)
 
-            rgb_unseen, depth_unseen, _ = test_data #TODO: Change to cityscapes/KITTI
-            rgb_unseen = rgb_unseen.to(device)
-            depth_unseen = depth_unseen.to(device)
-
-            input_map = {"rgb" : rgb_batch, "depth" : depth_batch, "rgb_unseen" : rgb_unseen, "depth_unseen" : depth_unseen}
+            # rgb_unseen, depth_unseen = test_data #TODO: Change to cityscapes/KITTI
+            # rgb_unseen = rgb_unseen.to(device)
+            # depth_unseen = depth_unseen.to(device)
+            #
+            input_map = {"rgb" : rgb_batch, "depth" : depth_batch, "rgb_unseen" : rgb_batch, "depth_unseen" : depth_batch}
             dt.train(epoch, iteration, input_map, input_map)
 
             iteration = iteration + 1
@@ -160,12 +162,12 @@ def main(argv):
                     dt.visdom_plot(iteration)
                     dt.visdom_visualize(input_map, "Train")
 
-                    # rgb_batch, depth_batch, _ = test_data
-                    # rgb_batch = rgb_batch.to(device)
-                    # depth_batch = depth_batch.to(device)
-                    # input_map = {"rgb": rgb_batch, "depth": depth_batch}
-                    #
-                    # dt.visdom_visualize(input_map, "Test")
+                    rgb_batch, depth_batch = next(itertools.cycle(test_loader))
+                    rgb_batch = rgb_batch.to(device)
+                    depth_batch = depth_batch.to(device)
+                    input_map = {"rgb": rgb_batch, "depth": depth_batch}
+
+                    dt.visdom_visualize(input_map, "Test")
 
         if(dt.is_stop_condition_met()):
             break

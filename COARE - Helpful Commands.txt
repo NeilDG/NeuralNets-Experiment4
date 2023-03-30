@@ -8,7 +8,7 @@ cd scratch2/Visdom
 unzip "scratch2/SynthWeather Dataset 10.zip"
 
 git clone -b "workspace/V01.XX.XX" "https://github.com/NeilDG/NeuralNets-Experiment4.git" "scratch2/NeuralNets-GenerativeExperiment-V01.XX.XX"
-rm -rf "/scratch1/scratch2/neil.delgallego/NeuralNets-GenerativeExperiment-V60.XX.XX"
+rm -rf "/scratch1/scratch2/neil.delgallego/NeuralNets-GenerativeExperiment-V01.XX.XX"
 rm -rf "/scratch1/scratch2/neil.delgallego/SynthV3_Raw/"
 rm -rf "/scratch1/scratch2/neil.delgallego/SynthWeather Dataset 10/"
 
@@ -24,14 +24,12 @@ sbatch visdom_run.slurm
 sbatch -w saliksik-cpu-23 visdom_run.slurm
 sbatch -w saliksik-cpu-23 --dependency=afterany:335892 visdom_run.slurm
 
-sbatch --dependency=afterany:440967 script_debug.slurm --ITERATION=1
+sbatch --dependency=afterany:448033 script_debug.slurm "depth_v01.15" 1
 
-sbatch script_debug.slurm "depth_v01.06" 9
+sbatch script_debug.slurm "depth_v01.15" 1
 sbatch slurm_download.sh
 sbatch script_gpu_1.slurm "depth_v01.06" 9
 sbatch script_gpu_2.slurm "depth_v01.06" 10
-sbatch script_gpu_2.slurm "depth_v01.06" 11
-sbatch script_gpu_2.slurm "depth_v01.06" 12
 
 sbatch --dependency=afterany:342338 script_debug.slurm
 sbatch --dependency=afterany:342351 script_1.slurm

@@ -16,15 +16,14 @@ import kornia
 from pathlib import Path
 import kornia.augmentation as K
 
-class GenericImageDataset(data.Dataset):
-    def __init__(self, img_length, rgb_list, exr_list, segmentation_list, transform_config):
+class DepthDataset(data.Dataset):
+    def __init__(self, img_length, rgb_list, exr_list, transform_config):
         config_holder = ConfigHolder.getInstance()
         self.augment_mode = config_holder.get_network_attribute("augment_key", "none")
         self.use_tanh = config_holder.get_network_attribute("use_tanh", False)
         self.img_length = img_length
         self.rgb_list = rgb_list
         self.exr_list = exr_list
-        self.segmentation_list = segmentation_list
         self.transform_config = transform_config
 
         self.norm_op = transforms.Normalize((0.5, ), (0.5, ))
@@ -66,23 +65,16 @@ class GenericImageDataset(data.Dataset):
             depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
             depth_img = 1.0 - self.initial_op(depth_img)
 
-            torch.set_rng_state(state)
-            segmentation_img = cv2.imread(self.segmentation_list[idx])
-            segmentation_img = cv2.cvtColor(segmentation_img, cv2.COLOR_BGR2RGB)
-            segmentation_img = self.initial_op(segmentation_img)
-
             if (self.transform_config == 1):
                 crop_indices = transforms.RandomCrop.get_params(rgb_img, output_size=self.patch_size)
                 i, j, h, w = crop_indices
 
                 rgb_img = transforms.functional.crop(rgb_img, i, j, h, w)
                 depth_img = transforms.functional.crop(depth_img, i, j, h, w)
-                segmentation_img = transforms.functional.crop(segmentation_img, i, j, h, w)
 
             if(self.use_tanh):
                 rgb_img = self.norm_op(rgb_img)
                 depth_img = self.norm_op(depth_img)
-                segmentation_img = self.norm_op(segmentation_img)
 
         except Exception as e:
             print("Failed to load: ", self.rgb_list[idx], self.exr_list[idx])
@@ -90,9 +82,8 @@ class GenericImageDataset(data.Dataset):
 
             rgb_img = None
             depth_img = None
-            segmentation_img = None
 
-        return rgb_img, depth_img, segmentation_img
+        return rgb_img, depth_img
 
     def __len__(self):
         return self.img_length
