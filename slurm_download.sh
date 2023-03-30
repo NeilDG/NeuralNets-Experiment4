@@ -10,7 +10,7 @@
 
 #About this script:
 #Download of dataset
-SERVER_CONFIG=5
+SERVER_CONFIG=0
 
 module load anaconda/3-2021.11
 module load cuda/10.1_cudnn-7.6.5
@@ -18,7 +18,7 @@ source activate NeilGAN_V2
 
 #do fresh install
 pip-review --local --auto
-pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu116
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 pip install scikit-learn
 pip install scikit-image
 pip install visdom

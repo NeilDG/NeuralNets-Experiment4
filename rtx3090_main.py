@@ -39,8 +39,8 @@ def test_img2img():
               "--iteration=4")
 
 def main():
-    train_depth()
-    # test_depth()
+    # train_depth()
+    test_depth()
     #
     # train_img2img()
     #  test_img2img()
