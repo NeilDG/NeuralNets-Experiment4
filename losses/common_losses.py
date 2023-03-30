@@ -1,6 +1,5 @@
 import kornia.losses
 from losses import depth_losses
-import lpips
 import torch.nn as nn
 import torch
 from config.network_config import ConfigHolder
@@ -12,7 +11,6 @@ class LossRepository():
     def __init__(self, gpu_device, iteration):
         self.gpu_device = gpu_device
         self.iteration = iteration
-        self.lpips_loss = lpips.LPIPS(net='vgg').to(self.gpu_device)
         self.l1_loss = nn.L1Loss()
         self.mse_loss = nn.MSELoss()
         self.bce_loss = nn.BCEWithLogitsLoss()
@@ -94,15 +92,5 @@ class LossRepository():
         weight = config_holder.get_hyper_params_weight(self.iteration, "ssim_weight")
         if (weight > 0.0):
             return self.ssim_loss(pred, target) * weight
-        else:
-            return torch.zeros_like(self.l1_loss(pred, target))
-
-    def compute_lpip_loss(self, pred, target):
-        config_holder = ConfigHolder.getInstance()
-        weight = config_holder.get_hyper_params_weight(self.iteration, "lpip_weight")
-        if (weight > 0.0):
-            result = torch.squeeze(self.lpips_loss(pred, target))
-            result = torch.mean(result) * weight
-            return result
         else:
             return torch.zeros_like(self.l1_loss(pred, target))

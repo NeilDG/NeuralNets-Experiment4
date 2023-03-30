@@ -9,7 +9,6 @@ import torch.cuda.amp as amp
 import itertools
 from model.modules import image_pool
 from utils import plot_utils, tensor_utils
-import lpips
 import torch.nn as nn
 import numpy as np
 from trainers import early_stopper
@@ -67,7 +66,6 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.CYCLE_LOSS_KEY = "cyc"
         self.G_ADV_LOSS_KEY = "g_adv"
         self.LIKENESS_LOSS_KEY = "likeness"
-        self.LPIP_LOSS_KEY = "lpip"
         self.RMSE_LOSS_KEY = "rmse_loss"
         self.SSIM_LOSS_KEY = "ssim_loss"
 
@@ -82,7 +80,6 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.losses_dict[self.LIKENESS_LOSS_KEY] = []
         self.losses_dict[self.CYCLE_LOSS_KEY] = []
         self.losses_dict[self.IDENTITY_LOSS_KEY] = []
-        self.losses_dict[self.LPIP_LOSS_KEY] = []
         self.losses_dict[self.G_ADV_LOSS_KEY] = []
         self.losses_dict[self.RMSE_LOSS_KEY] = []
         self.losses_dict[self.SSIM_LOSS_KEY] = []
@@ -95,7 +92,6 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.caption_dict[self.LIKENESS_LOSS_KEY] = "L1 loss per iteration"
         self.caption_dict[self.CYCLE_LOSS_KEY] = "Cycle loss per iteration"
         self.caption_dict[self.IDENTITY_LOSS_KEY] = "Identity loss per iteration"
-        self.caption_dict[self.LPIP_LOSS_KEY] = "LPIP loss per iteration"
         self.caption_dict[self.G_ADV_LOSS_KEY] = "G adv loss per iteration"
         self.caption_dict[self.RMSE_LOSS_KEY] = "RMSE loss per iteration"
         self.caption_dict[self.SSIM_LOSS_KEY] = "SSIM loss per iteration"
@@ -176,7 +172,6 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
 
             B_identity_loss = self.compute_identity_loss(identity_b, img_b)
             B_likeness_loss = self.common_losses.compute_l1_loss(img_a2b, img_b)
-            B_lpip_loss = self.common_losses.compute_lpip_loss(img_a2b, img_b)
             B_cycle_loss = self.compute_cycle_loss(self.G_A2B(self.G_B2A(img_b)), img_b)
 
             prediction = self.D_B(img_a2b)
@@ -188,14 +183,13 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
 
             A_identity_loss = self.compute_identity_loss(identity_a, img_a)
             A_likeness_loss = self.common_losses.compute_l1_loss(img_b2a, img_a)
-            A_lpip_loss = self.common_losses.compute_lpip_loss(img_b2a, img_a)
             A_cycle_loss = self.compute_cycle_loss(self.G_B2A(self.G_A2B(img_a)), img_a)
 
             prediction = self.D_A(img_b2a)
             real_tensor = torch.ones_like(prediction)
             A_adv_loss = self.common_losses.compute_adversarial_loss(prediction, real_tensor)
 
-            errG = A_identity_loss + B_identity_loss + A_likeness_loss + B_likeness_loss + A_lpip_loss + B_lpip_loss + A_adv_loss + B_adv_loss + A_cycle_loss + B_cycle_loss
+            errG = A_identity_loss + B_identity_loss + A_likeness_loss + B_likeness_loss + A_adv_loss + B_adv_loss + A_cycle_loss + B_cycle_loss
             self.fp16_scaler.scale(errG).backward()
 
             if (accum_batch_size % self.batch_size == 0):
@@ -209,7 +203,6 @@ class Img2ImgTrainer(abstract_iid_trainer.AbstractIIDTrainer):
                     self.losses_dict[self.D_OVERALL_LOSS_KEY].append(errD.item())
                     self.losses_dict[self.IDENTITY_LOSS_KEY].append(A_identity_loss.item() + B_identity_loss.item())
                     self.losses_dict[self.LIKENESS_LOSS_KEY].append(B_likeness_loss.item())
-                    self.losses_dict[self.LPIP_LOSS_KEY].append(A_lpip_loss.item() + B_lpip_loss.item())
                     self.losses_dict[self.G_ADV_LOSS_KEY].append(A_adv_loss.item() + B_adv_loss.item())
                     self.losses_dict[self.D_A_LOSS_KEY].append(D_A_fake_loss.item() + D_A_real_loss.item())
                     self.losses_dict[self.D_B_LOSS_KEY].append(D_B_fake_loss.item() + D_B_real_loss.item())
