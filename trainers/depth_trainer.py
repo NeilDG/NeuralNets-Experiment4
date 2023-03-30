@@ -9,7 +9,6 @@ import torch.cuda.amp as amp
 import itertools
 from model.modules import image_pool
 from utils import plot_utils, tensor_utils
-import lpips
 import torch.nn as nn
 import numpy as np
 from trainers import early_stopper
@@ -29,7 +28,6 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
         self.use_bce = config_holder.get_hyper_params_weight(self.iteration, "is_bce")
         self.adv_weight = config_holder.get_hyper_params_weight(self.iteration, "adv_weight")
 
-        self.lpips_loss = lpips.LPIPS(net='vgg').to(self.gpu_device)
         self.l1_loss = nn.L1Loss()
         self.mse_loss = nn.MSELoss()
         self.bce_loss = nn.BCEWithLogitsLoss()
@@ -131,11 +129,6 @@ class DepthTrainer(abstract_iid_trainer.AbstractIIDTrainer):
             return self.ssim_loss(pred, target) * weight
         else:
             return torch.zeros_like(self.l1_loss(pred, target))
-
-    def lpip_loss(self, pred, target):
-        result = torch.squeeze(self.lpips_loss(pred, target))
-        result = torch.mean(result)
-        return result
 
     def initialize_dict(self):
         # dictionary keys
