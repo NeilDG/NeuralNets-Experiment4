@@ -31,7 +31,7 @@ class DepthDataset(data.Dataset):
         if ("augmix" in self.augment_mode and self.transform_config == 1):
             self.initial_op = transforms.Compose([
                 transforms.ToPILImage(),
-                transforms.Resize((256, 256)),
+                transforms.Resize((256, 256), antialias=True),
                 transforms.AugMix(),
                 transforms.RandomHorizontalFlip(0.5),
                 transforms.RandomVerticalFlip(0.5),
@@ -39,7 +39,7 @@ class DepthDataset(data.Dataset):
         else:
             self.initial_op = transforms.Compose([
                 transforms.ToPILImage(),
-                transforms.Resize((256, 256)),
+                transforms.Resize((256, 256), antialias=True),
                 transforms.RandomHorizontalFlip(0.5),
                 transforms.RandomVerticalFlip(0.5),
                 transforms.ToTensor()
@@ -98,13 +98,13 @@ class KittiDepthDataset(data.Dataset):
 
         self.initial_op = transforms.Compose([
             transforms.ToPILImage(),
-            transforms.Resize((88, 304)), #divide by 4 KITTI size
+            transforms.Resize((88, 304), antialias=True), #divide by 4 KITTI size
             transforms.ToTensor()
         ])
 
         self.depth_op = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Resize((88, 304)),  # divide by 4 KITTI size
+            transforms.Resize((88, 304), antialias=True),  # divide by 4 KITTI size
         ])
 
     def __getitem__(self, idx):
@@ -112,8 +112,9 @@ class KittiDepthDataset(data.Dataset):
         rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2RGB)
         rgb_img = self.initial_op(rgb_img)
 
-        depth_img = tensor_utils.kitti_depth_read(self.depth_list[idx])
-        # depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
+        # depth_img = tensor_utils.kitti_depth_read(self.depth_list[idx])
+        depth_img = cv2.imread(self.depth_list[idx])
+        depth_img = cv2.cvtColor(depth_img, cv2.COLOR_BGR2GRAY)
         depth_img = self.depth_op(depth_img)
 
         # rgb_img = self.norm_op(rgb_img)
@@ -142,7 +143,7 @@ class PairedImageDataset(data.Dataset):
         self.patch_size = (patch_size, patch_size)
         self.initial_op = transforms.Compose([
             transforms.ToPILImage(),
-            transforms.Resize((256, 256)),
+            transforms.Resize((256, 256), antialias=True),
             transforms.ToTensor()
         ])
 
