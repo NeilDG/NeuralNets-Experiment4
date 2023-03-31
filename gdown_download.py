@@ -10,7 +10,7 @@ def main(argv):
     (opts, args) = parser.parse_args(argv)
 
     if(opts.server_config == 0):
-        output_dir = "/scratch1/scratch2/neil.delgallego/SynthV3_Raw/"
+        output_dir = "/scratch3/neil.delgallego/SynthV3_Raw/"
     elif(opts.server_config == 4):
         output_dir = "D:/NeilDG/Datasets/SynthV3_Raw/"
     elif(opts.server_config == 5):
