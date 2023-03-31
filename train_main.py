@@ -40,6 +40,8 @@ def update_config(opts):
 
     if(global_config.server_config == 0): #COARE
         global_config.general_config["num_workers"] = 6
+        global_config.batch_size = network_config["batch_size"][0]
+        global_config.load_size = network_config["load_size"][0]
         global_config.disable_progress_bar = True
         global_config.path = "/scratch3/neil.delgallego/SynthV3_Raw/{dataset_version}/sequence.0/"
         print("Using COARE configuration. Workers: ", global_config.general_config["num_workers"])
