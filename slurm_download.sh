@@ -16,19 +16,21 @@ module load anaconda/3-2021.11
 module load cuda/10.1_cudnn-7.6.5
 source activate NeilGAN_V2
 
+git clone -b "workspace/V01.XX.XX" "https://github.com/NeilDG/NeuralNets-Experiment4.git" "NeuralNets-Experiment4-V01.XX.XX"
+
 #do fresh install
-pip-review --local --auto
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-pip install scikit-learn
-pip install scikit-image
-pip install visdom
-pip install kornia
-pip install opencv-python==4.5.5.62
-pip install --upgrade pillow
-pip install gputil
-pip install matplotlib
-pip install --upgrade --no-cache-dir gdown
-pip install PyYAML
+#pip-review --local --auto
+#pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+#pip install scikit-learn
+#pip install scikit-image
+#pip install visdom
+#pip install kornia
+#pip install opencv-python==4.5.5.62
+#pip install --upgrade pillow
+#pip install gputil
+#pip install matplotlib
+#pip install --upgrade --no-cache-dir gdown
+#pip install PyYAML
 
 if [ $SERVER_CONFIG == 0 ]
 then
@@ -43,7 +45,7 @@ fi
 
 if [ $SERVER_CONFIG == 0 ]
 then
-  OUTPUT_DIR="/scratch1/scratch2/neil.delgallego/SynthV3_Raw/"
+  OUTPUT_DIR="/scratch3/neil.delgallego/SynthV3_Raw/"
 elif [ $SERVER_CONFIG == 4 ]
 then
   OUTPUT_DIR="D:/NeilDG/Datasets/SynthV3_Raw/"

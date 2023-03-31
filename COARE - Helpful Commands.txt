@@ -3,11 +3,11 @@
 clear
 
 //For directories
-cd scratch2/NeuralNets-GenerativeExperiment-V01.XX.XX
-cd scratch2/Visdom
+cd scratch3/NeuralNets-GenerativeExperiment-V01.XX.XX
+cd scratch3/Visdom
 unzip "scratch2/SynthWeather Dataset 10.zip"
 
-git clone -b "workspace/V01.XX.XX" "https://github.com/NeilDG/NeuralNets-Experiment4.git" "scratch2/NeuralNets-GenerativeExperiment-V01.XX.XX"
+git clone -b "workspace/V01.XX.XX" "https://github.com/NeilDG/NeuralNets-Experiment4.git" "scratch3/NeuralNets-Experiment4-V01.XX.XX"
 rm -rf "/scratch1/scratch2/neil.delgallego/NeuralNets-GenerativeExperiment-V01.XX.XX"
 rm -rf "/scratch1/scratch2/neil.delgallego/SynthV3_Raw/"
 rm -rf "/scratch1/scratch2/neil.delgallego/SynthWeather Dataset 10/"
@@ -15,16 +15,19 @@ rm -rf "/scratch1/scratch2/neil.delgallego/SynthWeather Dataset 10/"
 gdown https://drive.google.com/uc?id=1B6erEfeB2_n_KYP5GtCQU-DHGE1bKEVE --o "scratch2/SynthWeather Dataset 10/"
 mv "/scratch1/scratch2/neil.delgallego/NeuralNets-GenerativeExperiment-V58.XX.XX/v26" "/scratch1/scratch2/neil.delgallego/SynthWeather Dataset 10/v26"
 
+git reflog expire --expire=now --all
+git gc --prune=now --aggressive
+
 //Execute job
-sbatch --dependency=afterany:361283 slurm_download.slurm
+sbatch --dependency=afterany:448263 slurm_download.slurm
 sbatch slurm_download.sh
-sbatch slurm_install.slurm
+sbatch slurm_install.sh
 sbatch slurm_visdom_test.slurm
 sbatch visdom_run.slurm
 sbatch -w saliksik-cpu-23 visdom_run.slurm
 sbatch -w saliksik-cpu-23 --dependency=afterany:335892 visdom_run.slurm
 
-sbatch --dependency=afterany:448033 script_debug.slurm "depth_v01.15" 1
+sbatch --dependency=afterany:448226 script_debug.slurm "depth_v01.15" 1
 
 sbatch script_debug.slurm "depth_v01.15" 1
 sbatch slurm_download.sh

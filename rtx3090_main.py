@@ -8,6 +8,10 @@ def train_depth():
               "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.13\" "
               "--iteration=1")
 
+    os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
+              "--plot_enabled=0 --save_every_iter=500 --network_version=\"depth_v01.13\" "
+              "--iteration=2")
+
     # FOR TESTING
     # os.system("python \"train_main.py\" --server_config=3 --img_to_load=-1 "
     #           "--plot_enabled=0 --save_every_iter=200 --network_version=\"depth_v01.12\" "
