@@ -43,7 +43,7 @@ fi
 
 if [ $SERVER_CONFIG == 0 ]
 then
-  OUTPUT_DIR="/scratch1/scratch2/neil.delgallego/SynthV3_Raw/"
+  OUTPUT_DIR="/scratch3/neil.delgallego/SynthV3_Raw/"
 elif [ $SERVER_CONFIG == 4 ]
 then
   OUTPUT_DIR="D:/NeilDG/Datasets/SynthV3_Raw/"
